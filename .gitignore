@@ -1,0 +1,16 @@
+# Environments
+.venv/
+__pycache__/
+*.pyc
+
+# Java setup
+jdk-*/
+jdk.zip
+
+# Data and Indexes (Do not push to github)
+data/
+indexes/
+
+# OS generated files
+.DS_Store
+Thumbs.db
