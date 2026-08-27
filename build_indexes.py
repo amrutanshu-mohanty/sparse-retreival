@@ -75,8 +75,9 @@ def build_index(input_dir: Path, index_dir: Path):
     
     # Construct pyserini index command
     # We need storePositions, storeDocvectors, storeRaw for Part 4a feedback
+    import sys
     cmd = [
-        "python", "-m", "pyserini.index.lucene",
+        sys.executable, "-m", "pyserini.index.lucene",
         "--collection", "JsonCollection",
         "--input", str(input_dir),
         "--index", str(index_dir),
