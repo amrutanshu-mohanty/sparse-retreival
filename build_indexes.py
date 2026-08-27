@@ -166,7 +166,20 @@ def main():
         ds_index_dir = indexes_dir / ds_name
         
         # 1. Prepare Data
-        corpus_size, num_queries = prepare_dataset(ds_name, ds_data_dir)
+        corpus_file = ds_data_dir / "corpus.jsonl"
+        if corpus_file.exists() and corpus_file.stat().st_size > 0:
+            print(f"corpus.jsonl already exists for {ds_name}. Skipping data preparation to save time...")
+            # We still need the query count and corpus size for the report
+            print("Quickly counting existing documents and queries...")
+            corpus_size = sum(1 for _ in open(corpus_file, 'r', encoding='utf-8'))
+            dataset_id = f"beir/{ds_name}/test"
+            try:
+                dataset = ir_datasets.load(dataset_id)
+            except KeyError:
+                dataset = ir_datasets.load(f"beir/{ds_name}")
+            num_queries = sum(1 for _ in dataset.queries_iter()) if dataset.has_queries() else 0
+        else:
+            corpus_size, num_queries = prepare_dataset(ds_name, ds_data_dir)
         
         # 2. Build Index
         build_time = build_index(ds_data_dir, ds_index_dir)
