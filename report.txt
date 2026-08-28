@@ -1,0 +1,21 @@
+Dataset Report Deliverables
+===========================
+
+Dataset: scifact
+ - Corpus Size: 5,183 documents
+ - Number of Queries (test split): 300
+ - Index Build Time: 12.60 seconds
+ - On-Disk Index Size: 10.09 MB
+
+Dataset: fever
+ - Corpus Size: 5,416,568 documents
+ - Number of Queries (test split): 6,666
+ - Index Build Time: 850.36 seconds
+ - On-Disk Index Size: 4.39 GB
+
+Dataset: hotpotqa
+ - Corpus Size: 5,233,329 documents
+ - Number of Queries (test split): 7,405
+ - Index Build Time: 423.77 seconds
+ - On-Disk Index Size: 2.27 GB
+
