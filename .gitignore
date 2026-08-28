@@ -3,11 +3,14 @@
 __pycache__/
 *.pyc
 
+
 # Java setup
 jdk-*/
 jdk.zip
 
 # Data and Indexes (Do not push to github)
+data.zip
+indexes.zip
 data/
 indexes/
 
