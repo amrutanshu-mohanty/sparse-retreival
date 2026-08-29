@@ -1,10 +1,10 @@
 import argparse
 import os
-import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Tuple
-
+import random
+rng = random.Random(42)
 # Set Java 21 LTS
 os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-21-openjdk-amd64"
 os.environ["OPENAI_API_KEY"] = "dummy"
@@ -98,6 +98,8 @@ def run_classic_tfidf_search(index_dir: Path, queries: Dict[str, str], k: int = 
     reader = DirectoryReader.open(fsdir)
     idx_searcher = IndexSearcher(reader.getContext())
     idx_searcher.setSimilarity(ClassicSimilarity())
+    print(idx_searcher.getSimilarity())
+    print(idx_searcher.getSimilarity().getClass().getName())
     stored_fields = reader.storedFields()
     
     run = {}
@@ -177,15 +179,15 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
         dev_queries, dev_qrels = load_dataset_queries_and_qrels(dev_ds_id)
         if len(dev_queries) > 1000:
             print(f"Subsampling 1,000 dev queries from {len(dev_queries)} for grid tuning speed...")
-            sampled_qids = list(dev_queries.keys())[:1000]
+            sampled_qids = rng.sample(list(dev_queries.keys()),1000)
             dev_queries = {qid: dev_queries[qid] for qid in sampled_qids}
             dev_qrels = {qid: dev_qrels[qid] for qid in sampled_qids if qid in dev_qrels}
     except Exception as e:
         print(f"Could not load dev split {dev_ds_id}: {e}. Using test split for tuning...")
         dev_queries, dev_qrels = test_queries, test_qrels
         
-    k1_grid = [0.2, 0.4, 0.6, 0.8, 0.9, 1.0, 1.2, 1.5, 1.8, 2.0]
-    b_grid = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    k1_grid = [0.3, 0.6, 0.9, 1.2, 1.6, 2.0]
+    b_grid  = [0.1, 0.2, 0.4, 0.6, 0.75, 0.9] 
     
     best_k1, best_b, _ = tune_bm25_grid(searcher_bm25, dev_queries, dev_qrels, k1_grid, b_grid, optimize_metric='nDCG@10')
     
