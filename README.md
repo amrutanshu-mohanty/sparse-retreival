@@ -12,7 +12,7 @@ This repository contains the setup and scripts required to build Pyserini (Lucen
 
 It is highly recommended to use a Python virtual environment as the dependencies (like Transformers and PyTorch via Pyserini) are very large.
 
-`ash
+```bash
 # 1. Create a virtual environment
 python -m venv .venv
 
@@ -24,25 +24,60 @@ source .venv/bin/activate
 
 # 3. Install the requirements
 pip install -r requirements.txt
-``n
+```
 ## Running the Indexer
 
-You can run the indexing script for one or multiple datasets. 
+You can run the indexing script for one or multiple datasets:
 
-`ash
+```bash
 # Run for SciFact (Small dataset, good for testing - takes ~15 seconds)
 python build_indexes.py --datasets scifact
 
-# Run for FEVER and HotpotQA (Large datasets - may take 15-30+ mins each)
+# Run for FEVER and HotpotQA (Large datasets - may take 5-10 mins each)
 python build_indexes.py --datasets fever hotpotqa
-``n
+```
+
+## Running Baseline Evaluations (Part 2)
+
+Evaluate Default BM25, Tuned BM25, and Classic TF-IDF baselines on the datasets:
+
+```bash
+# Evaluate SciFact baseline
+python evaluate_baselines.py --datasets scifact
+
+# Evaluate FEVER and HotpotQA baselines
+python evaluate_baselines.py --datasets fever hotpotqa
+```
+
+The resulting metrics table (nDCG@10, Recall@100, MRR@10, MAP) is saved in `part2_results.txt`.
+
+## Running Vocabulary Mismatch Analysis (Part 3)
+
+Perform the vocabulary mismatch and Jaccard-overlap distribution analysis for the datasets:
+
+```bash
+# Run vocabulary mismatch and Jaccard-overlap calculations
+python part3_analysis.py
+```
+
+This script will:
+1. Retrieve top-50 results using the tuned BM25 parameters.
+2. Label success vs. failure groups at $k \in \{10, 20, 50\}$.
+3. Compute token Jaccard overlaps with and without stopwords.
+4. Compare statistics (mean, median, std) between the full test set and a 500-query random sample.
+5. Save Jaccard distribution plots (density histograms) in the `part3_plots/` directory.
+6. Print and write lists of failed query IDs and concrete failure examples to `part3_analysis_report.txt`.
+
 ## File Lifecycle & Artifacts
 
-When you run the script, it generates several folders:
+When you run the scripts, it generates several folders and files:
 
-1. **data/**: Contains corpus.jsonl files (the raw documents formatted for Pyserini). You **can** delete these files after the indexes are built if you need to free up space (they take up a few GBs).
-2. **indexes/**: Contains the compiled Lucene indexes. **DO NOT DELETE THESE**. You will need these index files for subsequent parts of the assignment (like querying and Pseudo-Relevance Feedback in Part 4a).
-3. **~/.ir_datasets/**: A hidden cache folder in your user directory where the raw dataset zip files are initially downloaded.
-4. **eport.txt**: Contains the final deliverables (Corpus size, query count, build time, and on-disk size).
+1. **data/**: Contains formatted `corpus.jsonl` files for Pyserini. These can be safely deleted after the indexes are built to free up space.
+2. **indexes/**: Contains the compiled Lucene indexes. **DO NOT DELETE THESE**, as they are required for evaluations and subsequent steps (like querying and Pseudo-Relevance Feedback in Part 4).
+3. **~/.ir_datasets/**: Cache folder where raw zip source files are downloaded.
+4. **report.txt**: Summary of final indexing metrics (size, build time, document count).
+5. **part2_results.txt**: Contains retrieval metrics for all baseline runs.
+6. **part3_analysis_report.txt**: Report detailing the Jaccard-overlap statistics, failed query ID lists, and categorized failure examples.
+7. **part3_plots/**: Contains generated PNG distribution charts comparing lexical overlap for successful vs. failed queries.
 
-*Note: The data/ and indexes/ directories are intentionally added to .gitignore so you don't accidentally push gigabytes of data to GitHub.*
+*Note: The data/, indexes/, and temporary logs (like *.log and output.txt) are listed in .gitignore so they are not pushed to GitHub.*
