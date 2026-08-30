@@ -1,0 +1,193 @@
+========================================================================================================
+              PART 4: ROCCHIO PRF, QUERY EXPANSION & QUERY DRIFT ANALYSIS REPORT
+========================================================================================================
+
+--------------------------------------------------------------------------------------------------------
+DATASET: SCIFACT (300 Test Queries)
+--------------------------------------------------------------------------------------------------------
+
+Method / Configuration                             | nDCG@10   | Recall@100  | MRR@10    | MAP      
+----------------------------------------------------------------------------------------------------
+Baseline Tuned BM25 (No PRF)                       | 0.6826    | 0.9282      | 0.6464    | 0.6396   
+Pyserini Native RM3 (fb_docs=5, terms=10)          | 0.6549    | 0.9103      | 0.6106    | 0.6067   
+Rocchio (N=3, k=5, pos-only)                       | 0.5904    | 0.9030      | 0.5280    | 0.5225   
+Rocchio (N=5, k=10, pos-only)                      | 0.5155    | 0.8773      | 0.4420    | 0.4380   
+Rocchio (N=10, k=20, pos-only)                     | 0.4178    | 0.8967      | 0.3435    | 0.3437   
+Rocchio (N=5, k=10, pos+neg gamma=0.15)            | 0.5185    | 0.8807      | 0.4431    | 0.4390   
+Tuned Rocchio (N=3, k=5, beta=0.25, gamma=0.0)     | 0.5904    | 0.9030      | 0.5280    | 0.5225   
+----------------------------------------------------------------------------------------------------
+
+QUANTITATIVE QUERY DRIFT SUMMARY (Delta nDCG@10 vs. Baseline BM25):
+Configuration                                      | Win % (>+0.01)  | Tie %    | Loss % (<-0.01)  | Severe Drift (<-0.20) 
+------------------------------------------------------------------------------------------------------------------------
+Rocchio (N=3, k=5, pos-only)                       | 12.3           % | 52.3    % | 35.3            % | 28.3                  %
+Rocchio (N=5, k=10, pos-only)                      | 8.7            % | 42.7    % | 48.7            % | 39.3                  %
+Rocchio (N=10, k=20, pos-only)                     | 5.7            % | 35.3    % | 59.0            % | 52.0                  %
+Rocchio (N=5, k=10, pos+neg gamma=0.15)            | 9.0            % | 42.0    % | 49.0            % | 39.7                  %
+Tuned Rocchio (N=3, k=5, beta=0.25, gamma=0.0)     | 12.3           % | 52.3    % | 35.3            % | 28.3                  %
+------------------------------------------------------------------------------------------------------------------------
+
+PART 3 VOCABULARY MISMATCH FAILURE RECOVERY ANALYSIS:
+ - Baseline Failed Queries (No relevant doc in Top-10): 49
+   -> Recovered into Top-10 after Rocchio Expansion:     3 (6.12%)
+   -> Recovered Query IDs (Top-10): ['887', '1175', '303']
+ - Baseline Failed Queries (No relevant doc in Top-20): 34
+   -> Recovered into Top-20 after Rocchio Expansion:     4 (11.76%)
+   -> Recovered Query IDs (Top-20): ['783', '132', '1175', '508']
+
+COMPLETE QUERY ID CLASSIFICATION LISTS (Under Standard Rocchio N=5, k=10):
+ - Improved Query IDs (26 queries):
+   ['72', '261', '1197', '887', '54', '1379', '784', '1320', '514', '232', '1132', '1274', '1180', '1175', '1041', '1196', '303', '36', '1121', '385', '300', '544', '781', '628', '269', '1272']
+
+ - Hurt / Drifted Query IDs (146 queries):
+   ['439', '198', '759', '212', '113', '314', '830', '343', '770', '50', '217', '575', '619', '324', '644', '237', '362', '921', '1029', '249', '100', '185', '275', '179', '133', '873', '274', '598', '549', '660', '1225', '808', '380', '692', '1146', '513', '756', '216', '521', '137', '94', '127', '785', '593', '823', '832', '743', '1241', '907', '1207', '1385', '569', '388', '718', '1216', '3', '75', '552', '1352', '1303', '440', '637', '691', '577', '1359', '649', '218', '1194', '128', '684', '1363', '163', '99', '993', '1245', '957', '1370', '859', '1014', '768', '525', '312', '533', '1202', '1150', '674', '268', '1232', '478', '532', '879', '183', '880', '1019', '1137', '539', '1382', '1362', '415', '208', '443', '693', '1021', '51', '115', '1163', '1266', '742', '213', '587', '1278', '386', '659', '516', '436', '967', '793', '219', '411', '1140', '1020', '744', '636', '971', '985', '936', '1344', '702', '811', '517', '729', '852', '1259', '1279', '814', '956', '141', '230', '527', '960', '410', '501', '1100', '148', '399', '597']
+
+ - Severe Drift Query IDs (118 queries):
+   ['198', '212', '113', '770', '50', '217', '575', '619', '644', '237', '362', '921', '1029', '249', '100', '185', '873', '274', '598', '549', '660', '1225', '808', '380', '692', '1146', '513', '216', '521', '137', '94', '127', '785', '593', '823', '832', '743', '1241', '907', '1207', '1385', '569', '718', '1216', '3', '552', '1352', '637', '691', '1359', '649', '218', '1194', '128', '684', '1363', '163', '99', '993', '1245', '957', '1014', '768', '525', '312', '533', '1202', '1150', '674', '1232', '478', '532', '879', '183', '880', '1137', '539', '1382', '1362', '415', '208', '443', '693', '1021', '51', '115', '1163', '1266', '742', '1278', '386', '659', '516', '436', '967', '793', '219', '411', '1140', '744', '636', '985', '936', '1344', '811', '517', '852', '1259', '1279', '814', '230', '527', '960', '410', '501', '148', '399', '597']
+
+ - Unaffected Query IDs (128 queries):
+   ['613', '831', '1086', '1273', '903', '783', '837', '452', '1', '700', '800', '1213', '49', '1336', '1191', '507', '1339', '690', '42', '623', '1024', '1368', '1221', '535', '1332', '239', '298', '53', '56', '236', '437', '143', '589', '1280', '578', '721', '294', '327', '502', '1099', '1319', '171', '1298', '1262', '132', '248', '820', '1292', '715', '129', '540', '295', '716', '142', '641', '723', '728', '1110', '1187', '1271', '431', '1282', '805', '70', '1204', '775', '845', '839', '130', '48', '1144', '1316', '1185', '238', '1062', '1089', '975', '727', '1290', '1130', '551', '491', '536', '1199', '1337', '870', '1281', '384', '821', '1107', '421', '475', '528', '1104', '338', '922', '847', '914', '1270', '1395', '911', '554', '913', '904', '1012', '124', '1088', '180', '560', '882', '1200', '233', '982', '1226', '350', '834', '13', '1335', '1389', '1179', '508', '57', '118', '1049', '146', '279', '354', '5']
+
+TOP 10 QUALITATIVE QUERY DRIFT CASE STUDIES (Queries most severely harmed by expansion):
+ Case 1: Query ID: 660
+  * Query Text: "Ivermectin is used to treat onchocerciasis."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.0000 (Delta: -1.0000)
+  * Added Expansion Terms: ascvd(0.07), arsb(0.06), chaseabc(0.04), spinal(0.03), light(0.03), cord(0.03), threshold(0.03), bed(0.03)
+  * Target Document Rank Shifts: Doc 1215116: Rank 1 -> -1
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 2: Query ID: 692
+  * Query Text: "Leuko-increased blood increases infectious complications in red blood cell transfusion."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.0000 (Delta: -1.0000)
+  * Added Expansion Terms: cjd(0.13), hydroxyethyl(0.08), starch(0.07), jakob(0.03), creutzfeldt(0.03), flow(0.03), fluid(0.02), risk(0.02)
+  * Target Document Rank Shifts: Doc 24088502: Rank 1 -> 16
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 3: Query ID: 674
+  * Query Text: "LDL cholesterol has no involvement in the development of cardiovascular disease."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.0000 (Delta: -1.0000)
+  * Added Expansion Terms: hdl(0.07), ldlr(0.05), lipoprotein(0.04), imt(0.03), mir(0.03), childhood(0.03), chd(0.03), risk(0.03)
+  * Target Document Rank Shifts: Doc 2095573: Rank 1 -> 22
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 4: Query ID: 742
+  * Query Text: "Macrolides have no protective effect against myocardial infarction."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.0000 (Delta: -1.0000)
+  * Added Expansion Terms: abciximab(0.07), alcohol(0.03), clopidogrel(0.03), sag(0.02), adp(0.02), prasugrel(0.02), ticagrelor(0.02), platelet(0.02)
+  * Target Document Rank Shifts: Doc 32159283: Rank 1 -> 12
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 5: Query ID: 1363
+  * Query Text: "Venules have a thinner or absent smooth layer compared to arterioles."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.3155 (Delta: -0.6845)
+  * Added Expansion Terms: sgc(0.06), lcx(0.04), filter(0.04), microm(0.04), odq(0.03), spatial(0.03), lad(0.03), epithelium(0.03)
+  * Target Document Rank Shifts: Doc 8290953: Rank 1 -> 8
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 6: Query ID: 879
+  * Query Text: "Occupancy of ribosomes by IncRNAs do not make functional peptides."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.3155 (Delta: -0.6845)
+  * Added Expansion Terms: sumo(0.12), eraap(0.11), cib(0.06), alphaiib(0.06), mhc(0.04), synthesis(0.03), pac(0.03), subunit(0.03)
+  * Target Document Rank Shifts: Doc 8426046: Rank 1 -> 8
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 7: Query ID: 597
+  * Query Text: "Incidence rates of cervical cancer have decreased."
+  * Baseline BM25 nDCG@10: 0.9134  -->  Post-Rocchio nDCG@10: 0.2346 (Delta: -0.6788)
+  * Added Expansion Terms: hpv(0.09), finland(0.07), neoplasia(0.05), grade(0.05), women(0.04), woman(0.03), cin(0.03), proportion(0.03)
+  * Target Document Rank Shifts: Doc 12779444: Rank 8 -> 48; Doc 36355784: Rank 1 -> 3; Doc 25742130: Rank 2 -> 14
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 8: Query ID: 684
+  * Query Text: "Lack of clpC does not affect sporulation efficiency in Bacillus subtilis cells."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.3333 (Delta: -0.6667)
+  * Added Expansion Terms: ermc(0.07), clpp(0.07), clp(0.07), tat(0.04), operon(0.04), ctsr(0.04), coli(0.04), clpe(0.03)
+  * Target Document Rank Shifts: Doc 4942718: Rank 1 -> 7
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 9: Query ID: 693
+  * Query Text: "Leuko-reduced blood reduces infectious complications in red blood cell transfusion."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.3333 (Delta: -0.6667)
+  * Added Expansion Terms: hydroxyethyl(0.08), cjd(0.07), starch(0.07), wbc(0.07), hcv(0.05), flow(0.03), rbc(0.03), nat(0.02)
+  * Target Document Rank Shifts: Doc 24088502: Rank 1 -> 7
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+ Case 10: Query ID: 237
+  * Query Text: "Cells lacking clpC have a defect in sporulation efficiency in Bacillus subtilis."
+  * Baseline BM25 nDCG@10: 1.0000  -->  Post-Rocchio nDCG@10: 0.3562 (Delta: -0.6438)
+  * Added Expansion Terms: ermc(0.07), clpp(0.07), clp(0.07), tat(0.04), operon(0.04), ctsr(0.04), coli(0.04), clpe(0.03)
+  * Target Document Rank Shifts: Doc 4942718: Rank 1 -> 6
+  * Drift Analysis: False-positive feedback documents in top-N introduced off-topic contextual terms that diluted the original query keywords, displacing relevant documents down the ranking.
+
+TOP 10 QUALITATIVE SUCCESSFUL INTENT EXPANSION CASE STUDIES (Queries most improved by expansion):
+ Case 1: Query ID: 232
+  * Query Text: "Cataract and trachoma are the primary cause of blindness in Southern Sudan."
+  * Baseline BM25 nDCG@10: 0.5000  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.5000)
+  * Added Expansion Terms: vision(0.10), hdi(0.05), low(0.04), ayod(0.03), payam(0.03), mankien(0.03), musca(0.02), media(0.02)
+  * Target Document Rank Shifts: Doc 10536636: Rank 3 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 2: Query ID: 784
+  * Query Text: "MicroRNA is involved in the regulation of Neural Stem Cell (NSC) differentiation and proliferation dynamic homeostasis"
+  * Baseline BM25 nDCG@10: 0.5000  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.5000)
+  * Added Expansion Terms: numbl(0.05), mir(0.04), transcription(0.04), adult(0.03), myc(0.03), quiescent(0.03), ansc(0.02), stimuli(0.02)
+  * Target Document Rank Shifts: Doc 2356950: Rank 3 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 3: Query ID: 261
+  * Query Text: "Chronic aerobic exercise alters endothelial function, improving vasodilating mechanisms mediated by NO."
+  * Baseline BM25 nDCG@10: 0.4575  -->  Post-Rocchio nDCG@10: 0.8503 (Delta: +0.3929)
+  * Added Expansion Terms: nox(0.06), vascular(0.05), lcx(0.04), nitric(0.03), plasma(0.03), endothelium(0.03), lad(0.03), smooth(0.03)
+  * Target Document Rank Shifts: Doc 1122279: Rank 4 -> 1; Doc 10697096: Rank 8 -> 5
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 4: Query ID: 887
+  * Query Text: "Only a minority of cells survive development after differentiation into stress-resistant spores."
+  * Baseline BM25 nDCG@10: 0.0000  -->  Post-Rocchio nDCG@10: 0.3869 (Delta: +0.3869)
+  * Added Expansion Terms: pcna(0.07), foxo(0.05), spore(0.04), prestalk(0.03), discoideum(0.03), stalk(0.02), neutrophil(0.02), stem(0.02)
+  * Target Document Rank Shifts: Doc 18855191: Rank 18 -> 5
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 5: Query ID: 269
+  * Query Text: "Cold exposure reduces BAT recruitment."
+  * Baseline BM25 nDCG@10: 0.6309  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.3691)
+  * Added Expansion Terms: brown(0.05), mural(0.05), white(0.04), oxygen(0.03), mice(0.02), free(0.02), fat(0.02), wat(0.02)
+  * Target Document Rank Shifts: Doc 970012: Rank 2 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 6: Query ID: 781
+  * Query Text: "Mice that lack Interferon-γ or its receptor exhibit high resistance to experimental autoimmune myocarditis."
+  * Baseline BM25 nDCG@10: 0.6309  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.3691)
+  * Added Expansion Terms: ifn(0.12), gamma(0.11), development(0.05), eau(0.04), cardiac(0.03), eam(0.03), heart(0.03), nitric(0.03)
+  * Target Document Rank Shifts: Doc 24338780: Rank 2 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 7: Query ID: 300
+  * Query Text: "Cytosolic proteins bind to iron-responsive elements on mRNAs coding for DMT1. Cytosolic proteins bind to iron-responsive elements on mRNAs coding for proteins involved in iron uptake."
+  * Baseline BM25 nDCG@10: 0.6309  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.3691)
+  * Added Expansion Terms: biofilm(0.05), copd(0.04), circular(0.04), exochelin(0.03), synthesis(0.03), rna(0.03), mcc(0.02), pten(0.02)
+  * Target Document Rank Shifts: Doc 3553087: Rank 2 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 8: Query ID: 1121
+  * Query Text: "Synaptic activity enhances local release of brain derived neurotrophic factor from postsynaptic dendrites."
+  * Baseline BM25 nDCG@10: 0.6309  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.3691)
+  * Added Expansion Terms: bdnf(0.07), trkb(0.06), camkii(0.04), nmda(0.04), fyn(0.04), arbor(0.04), spine(0.04), pacap(0.03)
+  * Target Document Rank Shifts: Doc 4456756: Rank 2 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 9: Query ID: 1320
+  * Query Text: "Transplanted human glial progenitor cells are incapable of forming a neural network with host animals' neurons."
+  * Baseline BM25 nDCG@10: 0.6309  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.3691)
+  * Added Expansion Terms: glia(0.03), crest(0.03), brain(0.03), stem(0.02), astroglia(0.02), cardiac(0.02), fgf(0.02), ltp(0.02)
+  * Target Document Rank Shifts: Doc 16284655: Rank 2 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+ Case 10: Query ID: 72
+  * Query Text: "Activator-inhibitor pairs are provided dorsally by Admpchordin."
+  * Baseline BM25 nDCG@10: 0.6309  -->  Post-Rocchio nDCG@10: 1.0000 (Delta: +0.3691)
+  * Added Expansion Terms: ventral(0.10), chordin(0.08), dorsal(0.08), admp(0.07), nmb(0.05), compartment(0.04), bmp(0.04), pain(0.04)
+  * Target Document Rank Shifts: Doc 6076903: Rank 2 -> 1
+  * Intent Match Analysis: Top pseudo-relevant documents supplied missing synonyms and related domain entities, bridging the vocabulary gap.
+
+

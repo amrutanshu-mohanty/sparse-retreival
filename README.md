@@ -68,6 +68,43 @@ This script will:
 5. Save Jaccard distribution plots (density histograms) in the `part3_plots/` directory.
 6. Print and write lists of failed query IDs and concrete failure examples to `part3_analysis_report.txt`.
 
+## Running Rocchio PRF, Query Expansion & Drift Analysis (Part 4a)
+
+Execute the Rocchio Pseudo-Relevance Feedback (PRF), parameter sensitivity, and query drift evaluation across the datasets. The results for each dataset can be saved separately under the `part4a_results/` folder:
+
+```bash
+# Ensure output directory exists
+mkdir part4a_results
+
+# 1. Run Part 4a on SciFact (with Dev Grid Search Tuning)
+python part4_rocchio.py --datasets scifact --output part4a_results/scifact_results.txt
+
+# 2. Run Part 4a on FEVER (bypassing Dev Grid Search using tuned params)
+python part4_rocchio.py --datasets fever --bypass-grid-search --output part4a_results/fever_results.txt
+
+# 3. Run Part 4a on HotpotQA (bypassing Dev Grid Search using tuned params)
+python part4_rocchio.py --datasets hotpotqa --bypass-grid-search --output part4a_results/hotpotqa_results.txt
+```
+
+Alternatively, to run all datasets together in a single run:
+```bash
+python part4_rocchio.py --datasets scifact fever hotpotqa --bypass-grid-search --output part4a_results/part4_results.txt
+```
+
+This script will:
+1. Perform automated **hyperparameter grid search on the dev split** (or load preset tuned parameters when `--bypass-grid-search` is passed).
+2. Evaluate 7 comparative retrieval configurations on the test split:
+   - Tuned BM25 Baseline (from Part 2)
+   - Pyserini Native RM3 Relevance Model ($N=5, k=10, w=0.5$)
+   - Conservative Rocchio ($N=3, k=5, \beta=0.75, \gamma=0.0$)
+   - Standard Rocchio ($N=5, k=10, \beta=0.75, \gamma=0.0$)
+   - Aggressive Rocchio ($N=10, k=20, \beta=0.75, \gamma=0.0$)
+   - Rocchio with Negative Feedback ($N=5, k=10, \beta=0.75, \gamma=0.15$, ranks 91–100)
+   - Dev Grid-Tuned Rocchio Model ($N^*, k^*, \beta^*, \gamma^*$)
+3. Measure **quantitative query drift** metrics ($P_{\text{win}}, P_{\text{tie}}, P_{\text{loss}}, P_{\text{severe}}$).
+4. Evaluate recovery of vocabulary mismatch failure cases identified in Part 3.
+5. Log complete categorized query ID lists and top-10 qualitative case studies to the output report.
+
 ## File Lifecycle & Artifacts
 
 When you run the scripts, it generates several folders and files:
@@ -79,5 +116,11 @@ When you run the scripts, it generates several folders and files:
 5. **part2_results.txt**: Contains retrieval metrics for all baseline runs.
 6. **part3_analysis_report.txt**: Report detailing the Jaccard-overlap statistics, failed query ID lists, and categorized failure examples.
 7. **part3_plots/**: Contains generated PNG distribution charts comparing lexical overlap for successful vs. failed queries.
+8. **part4a_results/**: Directory containing individual evaluation reports:
+   - `scifact_results.txt`: Full Part 4a metrics, query drift breakdown, and case studies for SciFact.
+   - `fever_results.txt`: Full Part 4a metrics, query drift breakdown, and case studies for FEVER.
+   - `hotpotqa_results.txt`: Full Part 4a metrics, query drift breakdown, and case studies for HotpotQA.
 
 *Note: The data/, indexes/, and temporary logs (like *.log and output.txt) are listed in .gitignore so they are not pushed to GitHub.*
+
+
