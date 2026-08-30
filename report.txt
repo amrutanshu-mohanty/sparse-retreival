@@ -1,0 +1,13 @@
+Dataset Report Deliverables
+===========================
+Dataset: fever
+ - Corpus Size: 5,416,568 documents
+ - Number of Queries (test split): 6,666
+ - Index Build Time: 787.68 seconds
+ - On-Disk Index Size: 4.39 GB
+
+Dataset: hotpotqa
+ - Corpus Size: 5,233,329 documents
+ - Number of Queries (test split): 7,405
+ - Index Build Time: 459.49 seconds
+ - On-Disk Index Size: 2.27 GB

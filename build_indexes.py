@@ -5,8 +5,35 @@ import time
 import subprocess
 from pathlib import Path
 
-# Setup JAVA_HOME since it's downloaded locally
-os.environ["JAVA_HOME"] = str(Path.cwd() / "jdk-21.0.2")
+# Setup JAVA_HOME and PATH dynamically for Windows before importing pyserini/jnius
+import sys
+
+def setup_java():
+    # Limit heap size to 1GB to prevent paging file size errors on Windows
+    os.environ["_JAVA_OPTIONS"] = "-Xmx1g"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    if "JAVA_HOME" not in os.environ:
+        workspace_dir = Path(__file__).resolve().parent
+        jdk_dirs = list(workspace_dir.glob("jdk-21*"))
+        if jdk_dirs:
+            os.environ["JAVA_HOME"] = str(jdk_dirs[0])
+            
+    if "JAVA_HOME" in os.environ:
+        java_home = os.environ["JAVA_HOME"]
+        if sys.platform == "win32":
+            bin_path = os.path.join(java_home, "bin")
+            server_path = os.path.join(java_home, "bin", "server")
+            paths = os.environ.get("PATH", "").split(os.pathsep)
+            if bin_path not in paths:
+                paths.insert(0, bin_path)
+            if server_path not in paths:
+                paths.insert(0, server_path)
+            os.environ["PATH"] = os.pathsep.join(paths)
+
+setup_java()
+
 
 import ir_datasets
 from tqdm import tqdm
@@ -19,51 +46,87 @@ def prepare_dataset(dataset_name: str, output_dir: Path):
     """
     print(f"Loading dataset: {dataset_name} using ir_datasets...")
     
-    # ir_datasets expects formats like 'beir/scifact/test' to get queries, 
-    # but docs can be accessed from the base or split.
-    # We will load the test split to get queries, and docs are corpus-wide.
     dataset_id = f"beir/{dataset_name}/test"
-    
     try:
         dataset = ir_datasets.load(dataset_id)
     except KeyError:
         print(f"Warning: {dataset_id} not found, falling back to base 'beir/{dataset_name}'")
         dataset_id = f"beir/{dataset_name}"
         dataset = ir_datasets.load(dataset_id)
-    
-    docs_output_file = output_dir / "corpus.jsonl"
-    
-    corpus_size = 0
-    
-    print(f"Writing documents to {docs_output_file}...")
-    with open(docs_output_file, 'w', encoding='utf-8') as f:
-        for doc in tqdm(dataset.docs_iter(), desc="Processing Docs"):
-            # BEIR datasets typically have doc_id, text, title
-            # Pyserini expects 'id' and 'contents'
-            title = getattr(doc, 'title', '')
-            text = getattr(doc, 'text', '')
-            
-            # Combine title and text (standard approach for BEIR in Pyserini)
-            if title and text:
-                contents = f"{title}\n{text}"
-            else:
-                contents = title or text
-                
-            pyserini_doc = {
-                "id": doc.doc_id,
-                "contents": contents
-            }
-            f.write(json.dumps(pyserini_doc) + '\n')
-            corpus_size += 1
-            
+        
     num_queries = 0
-    print("Counting queries...")
+    print("Counting queries and triggering download...")
     if dataset.has_queries():
         for _ in dataset.queries_iter():
             num_queries += 1
     else:
         print("No queries found in this split.")
-        
+
+    docs_output_file = output_dir / "corpus.jsonl"
+    corpus_size = 0
+    
+    # Try streaming from source.zip to avoid MemoryError on large datasets (FEVER/HotpotQA)
+    user_home = Path.home()
+    source_zip = user_home / ".ir_datasets" / "beir" / dataset_name / "source.zip"
+    
+    stream_success = False
+    if source_zip.exists():
+        import zipfile
+        print(f"Found source zip at {source_zip}. Streaming documents to avoid memory overhead...")
+        try:
+            with zipfile.ZipFile(source_zip, 'r') as z:
+                corpus_zip_path = None
+                for name in z.namelist():
+                    if name.endswith("corpus.jsonl"):
+                        corpus_zip_path = name
+                        break
+                
+                if corpus_zip_path:
+                    print(f"Extracting and formatting documents from {corpus_zip_path}...")
+                    with z.open(corpus_zip_path, 'r') as corpus_file, open(docs_output_file, 'w', encoding='utf-8') as out_f:
+                        import io
+                        text_stream = io.TextIOWrapper(corpus_file, encoding='utf-8')
+                        for line in tqdm(text_stream, desc="Processing Docs (Zip Stream)"):
+                            doc_data = json.loads(line)
+                            doc_id = doc_data.get('_id', doc_data.get('id', ''))
+                            title = doc_data.get('title', '')
+                            text = doc_data.get('text', '')
+                            
+                            if title and text:
+                                contents = f"{title}\n{text}"
+                            else:
+                                contents = title or text
+                                
+                            pyserini_doc = {
+                                "id": doc_id,
+                                "contents": contents
+                            }
+                            out_f.write(json.dumps(pyserini_doc) + '\n')
+                            corpus_size += 1
+                    stream_success = True
+                else:
+                    print("corpus.jsonl not found in source.zip.")
+        except Exception as e:
+            print(f"Error streaming from zip: {e}. Falling back to standard docs_iter()...")
+            
+    if not stream_success:
+        print(f"Writing documents to {docs_output_file} using docs_iter (fallback)...")
+        with open(docs_output_file, 'w', encoding='utf-8') as f:
+            for doc in tqdm(dataset.docs_iter(), desc="Processing Docs"):
+                title = getattr(doc, 'title', '')
+                text = getattr(doc, 'text', '')
+                if title and text:
+                    contents = f"{title}\n{text}"
+                else:
+                    contents = title or text
+                    
+                pyserini_doc = {
+                    "id": doc.doc_id,
+                    "contents": contents
+                }
+                f.write(json.dumps(pyserini_doc) + '\n')
+                corpus_size += 1
+
     return corpus_size, num_queries
 
 
@@ -90,7 +153,15 @@ def build_index(input_dir: Path, index_dir: Path):
     
     start_time = time.time()
     
-    process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    env = os.environ.copy()
+    env["_JAVA_OPTIONS"] = "-Xmx8g"
+    
+    print("DEBUG: cmd =", cmd)
+    print("DEBUG: JAVA_HOME =", env.get("JAVA_HOME"))
+    print("DEBUG: PATH =", env.get("PATH"))
+    print("DEBUG: _JAVA_OPTIONS =", env.get("_JAVA_OPTIONS"))
+    
+    process = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
     
     build_time = time.time() - start_time
     

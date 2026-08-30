@@ -1,3 +1,7 @@
 pyserini==0.36.0
 ir_datasets>=0.6.3
 tqdm==4.66.1
+faiss-cpu
+torch
+pytrec-eval-terrier
+matplotlib

@@ -6,7 +6,33 @@ from typing import Dict, List, Tuple
 import random
 rng = random.Random(42)
 # Set Java 21 LTS
-os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-21-openjdk-amd64"
+import sys
+
+def setup_java():
+    # Limit heap size to 1GB to prevent paging file size errors on Windows
+    os.environ["_JAVA_OPTIONS"] = "-Xmx1g"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    if "JAVA_HOME" not in os.environ:
+        workspace_dir = Path(__file__).resolve().parent
+        jdk_dirs = list(workspace_dir.glob("jdk-21*"))
+        if jdk_dirs:
+            os.environ["JAVA_HOME"] = str(jdk_dirs[0])
+            
+    if "JAVA_HOME" in os.environ:
+        java_home = os.environ["JAVA_HOME"]
+        if sys.platform == "win32":
+            bin_path = os.path.join(java_home, "bin")
+            server_path = os.path.join(java_home, "bin", "server")
+            paths = os.environ.get("PATH", "").split(os.pathsep)
+            if bin_path not in paths:
+                paths.insert(0, bin_path)
+            if server_path not in paths:
+                paths.insert(0, server_path)
+            os.environ["PATH"] = os.pathsep.join(paths)
+
+setup_java()
 os.environ["OPENAI_API_KEY"] = "dummy"
 
 from pyserini.search.lucene import LuceneSearcher
