@@ -100,7 +100,7 @@ This script will:
    - Standard Rocchio ($N=5, k=10, \beta=0.75, \gamma=0.0$)
    - Aggressive Rocchio ($N=10, k=20, \beta=0.75, \gamma=0.0$)
    - Rocchio with Negative Feedback ($N=5, k=10, \beta=0.75, \gamma=0.15$, ranks 91–100)
-   - Dev Grid-Tuned Rocchio Model ($N^*, k^*, \beta^*, \gamma^*$)
+   - Dev Grid-Tuned Rocchio Model ($N^\ast, k^\ast, \beta^\ast, \gamma^\ast$)
 3. Measure **quantitative query drift** metrics ($P_{\text{win}}, P_{\text{tie}}, P_{\text{loss}}, P_{\text{severe}}$).
 4. Evaluate recovery of vocabulary mismatch failure cases identified in Part 3.
 5. Log complete categorized query ID lists and top-10 qualitative case studies to the output report.
