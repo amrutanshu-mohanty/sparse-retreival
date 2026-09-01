@@ -105,6 +105,25 @@ This script will:
 4. Evaluate recovery of vocabulary mismatch failure cases identified in Part 3.
 5. Log complete categorized query ID lists and top-10 qualitative case studies to the output report.
 
+## Running HyDE (LLM-Generated Feedback) Analysis (Part 4b)
+
+Part 4b replaces corpus-retrieved feedback with LLM-generated hypothetical documents (HyDE) while reusing the Part 4a Rocchio implementation unchanged. 
+
+### 1. Ollama Setup (Local LLM)
+This step uses a local LLM to avoid paid APIs. You must have Ollama installed and the required model downloaded before running the script.
+1. Download and install [Ollama](https://ollama.com/).
+2. Open your terminal and pull the required Qwen2.5 7B model:
+   ```bash
+   ollama pull qwen2.5:7b
+   ```
+      ``` bash
+      # Run the full evaluation on SciFact (will take significant time to generate cache)
+      python part4b_hyde.py --datasets scifact
+
+      # Run on multiple datasets explicitly defining the model and number of docs (N=5)
+      python part4b_hyde.py --datasets fever hotpotqa --ollama-model qwen2.5:7b --hyde-n 5
+      ```
+
 ## File Lifecycle & Artifacts
 
 When you run the scripts, it generates several folders and files:
