@@ -1,0 +1,157 @@
+====================================================================================================
+        PART 5: SPLADE SPARSE RETRIEVAL — SCIFACT
+====================================================================================================
+
+SPLADE Model : naver/splade-cocondenser-ensembledistil
+Queries      : 300
+
+TABLE 1 — RETRIEVAL METRICS
+Method                                   | nDCG@10   | Recall@100  | MRR@10    | MAP      
+------------------------------------------------------------------------------------------
+Tuned BM25 Baseline (Part 2)             | 0.6826    | 0.9282      | 0.6464    | 0.6396   
+SPLADE (prebuilt index)                  | 0.7036    | 0.9353      | 0.6723    | 0.6655   
+Delta (SPLADE - BM25)                    | 0.0211+++ | 0.0071+++++ | 0.0259+++ | 0.0259+++
+------------------------------------------------------------------------------------------
+
+TABLE 2 — THREE-WAY EXPANSION TERM COMPARISON (15 queries)
+====================================================================================================
+
+Query ID: 1266
+  Text: "The risk of breast cancer among parous women increases with placental weight of pregnancies, and this association is strongest for premenopausal breast cancer."
+  SPLADE  : par(2.28), prem(1.71), place(1.68), ##eno(1.56), pregnancy(1.53), ##ous(1.42), ##ntal(1.40), ##usa(1.39), tumor(1.39), ##nta(1.21)
+  Rocchio : birth(0.03), bmi(0.03), american(0.03), white(0.02), incident(0.02), african(0.02), swedish(0.02), height(0.02)
+  HyDE    : birth(0.05), placenta(0.04), given(0.04), exhibit(0.03), relationship(0.02), higher(0.02), wherein(0.02), heavier(0.02)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 1086
+  Text: "Sildenafil improves erectile function in men who experience sexual dysfunction as a result of the use of SSRI antidepressants."
+  SPLADE  : ##lden(2.21), ssr(2.16), si(2.14), erect(1.77), ##af(1.64), ##ile(1.36), ##il(1.28), erection(1.27), drug(1.26), ##press(1.21)
+  Rocchio : natsal(0.03), health(0.03), women(0.02), serotonin(0.02), dhea(0.02), risk(0.02), sri(0.02), chlamydia(0.01)
+  HyDE    : serotonin(0.11), cgmp(0.09), inhibitor(0.05), smooth(0.04), side(0.04), flow(0.04), cyclic(0.03), can(0.03)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 312
+  Text: "De novo assembly of sequence data has more specific contigs than unassembled sequence data."
+  SPLADE  : ##ti(1.78), ##mbled(1.67), ##sse(1.50), una(1.45), con(1.37), assemble(1.18), ##mble(1.08), sequences(1.00), difference(0.90), sequencing(0.77)
+  Rocchio : bias(0.07), rsem(0.05), aurea(0.04), seq(0.04), genlisea(0.03), length(0.03), full(0.02), rna(0.02)
+  HyDE    : raw(0.10), dna(0.05), short(0.03), hand(0.03), longer(0.03), without(0.02), process(0.02), larger(0.02)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 239
+  Text: "Cellular aging closely links to an older appearance."
+  SPLADE  : cell(1.79), age(1.49), old(1.37), link(1.23), appearances(1.10), related(1.03), elderly(0.99), appear(0.99), linked(0.73), earlier(0.69)
+  Rocchio : polyq(0.05), atr(0.04), thymic(0.03), will(0.03), cardiovascular(0.03), threshold(0.02), hypothesis(0.02), internet(0.02)
+  HyDE    : skin(0.06), changes(0.04), gradual(0.03), process(0.02), stress(0.02), function(0.02), shorten(0.02), pro(0.01)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 213
+  Text: "CRP is not predictive of postoperative mortality following Coronary Artery Bypass Graft (CABG) surgery."
+  SPLADE  : cr(2.24), cab(2.19), predict(1.77), ##p(1.59), ##g(1.54), ##oper(1.38), predicted(1.29), corona(1.27), post(1.22), graf(1.19)
+  Rocchio : tdm(0.06), statin(0.06), cardiac(0.06), aki(0.05), group(0.03), cpk(0.03), ima(0.03), dose(0.03)
+  HyDE    : forecast(0.03), risk(0.03), marker(0.03), predictor(0.02), reflect(0.02), protein(0.02), reactant(0.02), post(0.01)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 1290
+  Text: "There is an inverse relationship between hip fractures and statin use."
+  SPLADE  : stat(2.22), fracture(1.40), ##in(1.36), correlation(1.09), yes(0.84), reverse(0.82), effect(0.72), drug(0.68), addiction(0.64), used(0.61)
+  Rocchio : bmd(0.06), bone(0.04), capsaicin(0.04), pain(0.03), risk(0.02), women(0.02), nonstatin(0.01), cgrp(0.01)
+  HyDE    : cholesterol(0.07), hmg(0.06), bone(0.05), coa(0.05), research(0.03), lower(0.03), risk(0.03), class(0.03)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.111
+
+Query ID: 124
+  Text: "Antiretroviral therapy reduces rates of tuberculosis across a broad range of CD4 strata."
+  SPLADE  : cd(2.00), tb(1.82), anti(1.67), ##ira(1.58), ##rov(1.50), reduce(1.49), ##ret(1.45), ##4(1.44), rate(1.22), hiv(1.21)
+  Rocchio : art(0.09), hiv(0.08), partnership(0.04), count(0.03), haart(0.03), rifamycin(0.02), death(0.02), treatment(0.02)
+  HyDE    : art(0.21), hiv(0.10), count(0.08), regardless(0.05), risk(0.03), crucial(0.02), shown(0.02), function(0.02)
+  Overlap(SPLADE,Rocchio) = 0.071  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.176
+  Shared by all three: hiv
+
+Query ID: 887
+  Text: "Only a minority of cells survive development after differentiation into stress-resistant spores."
+  SPLADE  : stressed(1.39), cell(1.35), majority(1.22), resistance(1.20), ##pore(1.18), develop(1.08), survival(0.98), differentiate(0.71), few(0.67), pathogen(0.62)
+  Rocchio : pcna(0.07), foxo(0.05), spore(0.04), prestalk(0.03), discoideum(0.03), stalk(0.02), neutrophil(0.02), stem(0.02)
+  HyDE    : spore(0.11), changes(0.05), process(0.05), dormant(0.04), proportion(0.03), cellular(0.03), cold(0.02), heat(0.02)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 1204
+  Text: "The combination of H3K4me3 and H3K79me2 is found in quiescent hair follicle stem cells."
+  SPLADE  : qui(1.87), ##3(1.53), ##me(1.49), hairs(1.40), ##cent(1.27), ##icle(1.21), ##k(1.20), ##2(1.16), ##oll(1.16), ##4(1.11)
+  Rocchio : aml(0.05), pcg(0.04), dermal(0.03), cryptic(0.03), self(0.02), transcription(0.02), nonskin(0.02), vivo(0.02)
+  HyDE    : state(0.09), dormant(0.06), mark(0.05), chromatin(0.04), crucial(0.03), gene(0.02), phase(0.02), dna(0.02)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 628
+  Text: "Infection of human T-cell lymphotropic virus type 1 is most frequent in individuals of African origin."
+  SPLADE  : africa(1.54), ##rop(1.44), ##ym(1.29), common(1.15), infections(1.10), ##ot(0.93), pathogen(0.92), ##ph(0.90), frequency(0.89), hiv(0.83)
+  Rocchio : hiv(0.10), htlv(0.08), leukaemia(0.03), retrovirus(0.03), viral(0.03), caribbean(0.03), sivagm(0.03), hsv(0.02)
+  HyDE    : htlv(0.28), spastic(0.08), retrovirus(0.07), africa(0.06), lymphoma(0.05), west(0.05), leukemia(0.04), descent(0.04)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.176
+
+Query ID: 1100
+  Text: "Statins increase blood cholesterol."
+  SPLADE  : stat(2.80), ##terol(1.67), ##in(1.45), drug(1.19), cho(1.14), ##ins(1.04), effect(0.99), ##les(0.97), raise(0.89), increased(0.88)
+  Rocchio : ldl(0.07), ascvd(0.07), statin(0.05), hdl(0.05), heart(0.03), threshold(0.03), chd(0.03), risk(0.03)
+  HyDE    : hmg(0.14), coa(0.11), ldl(0.11), lipoprotein(0.08), synthesis(0.07), bad(0.05), cardiovascular(0.04), liver(0.04)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.111
+
+Query ID: 1099
+  Text: "Statins decrease blood cholesterol."
+  SPLADE  : stat(2.80), ##terol(1.62), ##in(1.41), drug(1.17), increase(1.16), reduce(1.15), cho(1.10), ##ins(1.00), effect(1.00), ##les(0.91)
+  Rocchio : ldl(0.07), ascvd(0.07), statin(0.05), hdl(0.05), heart(0.03), threshold(0.03), chd(0.03), risk(0.03)
+  HyDE    : ldl(0.12), bad(0.09), hmg(0.09), synthesis(0.08), coa(0.07), lipoprotein(0.07), bloodstream(0.05), liver(0.05)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.111
+
+Query ID: 1216
+  Text: "The extracellular domain of TMEM27 is cleaved in human beta cells."
+  SPLADE  : ##27(2.22), ##me(2.00), extra(1.93), ##ea(1.82), ##cellular(1.80), cl(1.54), 27(1.44), ##ved(1.35), ##m(1.07), domains(1.07)
+  Rocchio : gasdermin(0.05), disintegrin(0.05), gsdmd(0.04), integrin(0.04), alpha(0.04), fibronectin(0.03), vitronectin(0.03), rich(0.03)
+  HyDE    : protein(0.07), portion(0.07), cellular(0.04), crucial(0.04), insulin(0.04), process(0.02), pancreas(0.02), function(0.02)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 198
+  Text: "CCL19 is absent within dLNs."
+  SPLADE  : dl(2.29), cc(2.15), ##19(1.99), ##l(1.20), 19(1.18), absence(0.91), ##n(0.76), inhibitor(0.74), mutation(0.71), ##ns(0.67)
+  Rocchio : chemerin(0.04), hot(0.04), ligand(0.02), receptor(0.02), lung(0.02), human(0.02), fosmid(0.01), mice(0.01)
+  HyDE    : lymph(0.17), deep(0.11), motif(0.05), lymphoid(0.05), node(0.04), ligand(0.04), crucial(0.04), local(0.03)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 230
+  Text: "Carriers of the alcohol aldehyde dehydrogenase deficiency mutation drink less that non-carries."
+  SPLADE  : ##deh(1.73), ##genase(1.50), carrier(1.41), alcoholic(1.40), ##dro(1.35), carry(1.29), carrying(1.22), ##yde(1.07), al(1.05), drinking(1.05)
+  Rocchio : retail(0.03), men(0.03), risk(0.03), women(0.02), twin(0.02), harm(0.02), wine(0.02), mendelian(0.01)
+  HyDE    : nausea(0.08), byproduct(0.06), toxic(0.05), often(0.04), due(0.03), exhibit(0.03), tend(0.02), avoid(0.02)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
+
+AGGREGATE OVERLAP STATISTICS
+------------------------------------------------------------
+  Mean Jaccard(SPLADE, Rocchio) = 0.0117
+  Mean Jaccard(SPLADE, HyDE)    = 0.0163
+  Mean Jaccard(Rocchio, HyDE)   = 0.0633
+
+DISAGREEMENT CASE STUDIES
+====================================================================================================
+
+Case 1: Query "The risk of breast cancer among parous women increases with placental weight of pregnancies, and this association is strongest for premenopausal breast cancer." (ID: 1266)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##eno, ##nta, ##ntal, ##ous, ##usa, par, place, pregnancy
+  Rocchio-only terms: african, american, birth, bmi, first, height, incident, swedish
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
+Case 2: Query "Sildenafil improves erectile function in men who experience sexual dysfunction as a result of the use of SSRI antidepressants." (ID: 1086)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##af, ##il, ##ile, ##lden, ##press, drug, erect, erection
+  Rocchio-only terms: britain, chlamydia, dhea, health, natsal, placebo, risk, serotonin
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
+Case 3: Query "De novo assembly of sequence data has more specific contigs than unassembled sequence data." (ID: 312)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##mble, ##mbled, ##sse, ##ti, assemble, con, difference, sequences
+  Rocchio-only terms: alpha, aurea, bias, bruijn, full, genlisea, length, rna
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+

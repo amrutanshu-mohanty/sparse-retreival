@@ -121,8 +121,36 @@ This step uses a local LLM to avoid paid APIs. You must have Ollama installed an
       python part4b_hyde.py --datasets scifact
 
       # Run on multiple datasets explicitly defining the model and number of docs (N=5)
-      python part4b_hyde.py --datasets fever hotpotqa --ollama-model qwen2.5:7b --hyde-n 5
-      ```
+       python part4b_hyde.py --datasets fever hotpotqa --ollama-model qwen2.5:7b --hyde-n 5
+       ```
+
+## Running SPLADE Sparse Retrieval (Part 5)
+
+Part 5 uses a pretrained SPLADE checkpoint to encode queries and retrieve from prebuilt SPLADE impact indexes. It also compares expansion terms against Rocchio (Part 4a) and HyDE (Part 4b).
+
+### Prerequisites
+- `transformers` package (for loading the SPLADE model from HuggingFace)
+- GPU recommended for query encoding (CPU works but is slower)
+- Prebuilt Pyserini SPLADE indexes are auto-downloaded on first run
+
+```bash
+# Install additional dependency
+pip install transformers>=4.30.0
+
+# Run on SciFact (fastest, ~5 min)
+python part5_splade.py --datasets scifact
+
+# Run on all datasets
+python part5_splade.py --datasets scifact fever hotpotqa
+
+# Use a specific SPLADE model (default: naver/splade-cocondenser-ensembledistil)
+python part5_splade.py --datasets scifact --model naver/splade-v3
+
+# Control number of queries for expansion-term comparison (default: 15)
+python part5_splade.py --datasets scifact --num-comparison 20
+```
+
+Results are saved in `part5_results/{dataset}_results.txt`.
 
 ## File Lifecycle & Artifacts
 

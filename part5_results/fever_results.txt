@@ -1,0 +1,161 @@
+====================================================================================================
+        PART 5: SPLADE SPARSE RETRIEVAL — FEVER
+====================================================================================================
+
+SPLADE Model : naver/splade-cocondenser-ensembledistil
+Queries      : 6666
+
+TABLE 1 — RETRIEVAL METRICS
+Method                                   | nDCG@10   | Recall@100  | MRR@10    | MAP      
+------------------------------------------------------------------------------------------
+Tuned BM25 Baseline (Part 2)             | 0.6843    | 0.9275      | 0.6596    | 0.6316   
+SPLADE (prebuilt index)                  | 0.7879    | 0.9459      | 0.7864    | 0.7444   
+Delta (SPLADE - BM25)                    | 0.1036+++ | 0.0184+++++ | 0.1268+++ | 0.1128+++
+------------------------------------------------------------------------------------------
+
+TABLE 2 — THREE-WAY EXPANSION TERM COMPARISON (15 queries)
+====================================================================================================
+
+Query ID: 26525
+  Text: "Shomu Mukherjee died at the age of 64."
+  SPLADE  : sho(2.28), ##mu(1.91), 64(1.38), death(1.31), die(1.29), old(1.18), india(1.08), ##jee(0.91), she(0.76), kumar(0.62)
+  Rocchio : samarth(0.34), tanuja(0.26), filmalaya(0.11), sashadhar(0.11), mukerji(0.09), produced(0.09), tanisha(0.08), kajol(0.08)
+  HyDE    : information(0.23), claim(0.12), provide(0.11), official(0.10), historical(0.08), indian(0.08), academic(0.07), need(0.06)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 48936
+  Text: "Reanimation is not a remix album."
+  SPLADE  : ##mation(2.24), ##ani(2.11), re(2.00), albums(1.22), yes(1.03), parody(0.92), fake(0.84), remixes(0.81), copyright(0.78), song(0.71)
+  Rocchio : released(0.28), linkin(0.11), hybrid(0.08), crunk(0.07), series(0.06), band(0.05), produced(0.05), mixed(0.05)
+  HyDE    : electronic(0.35), original(0.11), house(0.09), project(0.09), series(0.08), music(0.08), producer(0.07), various(0.07)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 10674
+  Text: "Manchester United F.C. was the world's highest-earning football club for a season."
+  SPLADE  : salary(1.30), biggest(1.28), nfl(1.20), clubs(1.03), england(1.01), earn(0.94), fc(0.93), team(0.87), soccer(0.71), footballer(0.71)
+  Rocchio : city(0.16), one(0.11), cup(0.10), professional(0.07), considered(0.05), uefa(0.05), english(0.05), domestic(0.05)
+  HyDE    : revenue(0.20), commercial(0.14), including(0.11), however(0.10), indeed(0.10), money(0.06), examine(0.06), claim(0.06)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 3967
+  Text: "Yvonne Strahovski's real last name is Strzechowski."
+  SPLADE  : ##rah(1.97), ##owski(1.94), ##rz(1.84), ##ski(1.76), ##ech(1.56), st(1.55), ##ov(1.34), she(1.03), poland(0.99), nationality(0.77)
+  Rocchio : series(0.34), chuck(0.16), volkoff(0.08), miranda(0.06), however(0.06), mass(0.06), television(0.05), include(0.05)
+  HyDE    : however(0.12), claim(0.06), adopted(0.06), professional(0.06), polish(0.05), munich(0.05), descent(0.05), common(0.05)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 148057
+  Text: "The Nottingham Forest F.C. is barred from being a football club."
+  SPLADE  : trent(1.61), forests(1.26), clubs(1.25), barr(1.19), nfl(1.14), england(0.83), ban(0.83), fc(0.74), association(0.74), sheffield(0.66)
+  Rocchio : history(0.31), formation(0.12), covers(0.12), information(0.11), competed(0.09), included(0.08), general(0.07), season(0.07)
+  HyDE    : however(0.16), history(0.11), english(0.08), operate(0.08), placed(0.08), tier(0.07), professional(0.07), status(0.05)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.111
+
+Query ID: 76562
+  Text: "General Motors' non-automotive products divested in the 1980s through 2000s."
+  SPLADE  : dive(1.62), gm(1.40), vehicle(1.14), auto(1.11), motor(1.11), date(1.08), early(1.06), ##sted(1.02), car(0.91), diving(0.90)
+  Rocchio : company(0.18), engines(0.11), mini(0.10), cars(0.09), chevrolet(0.07), opel(0.07), ludvigsen(0.06), industrial(0.06)
+  HyDE    : business(0.27), company(0.20), core(0.11), series(0.11), one(0.11), manufacturer(0.09), however(0.06), including(0.06)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.111
+  Shared by all three: company
+
+Query ID: 60442
+  Text: "Tye Sheridan was cut from The Tree of Life."
+  SPLADE  : ty(1.91), trees(1.11), cutting(0.95), character(0.79), ##e(0.77), murder(0.77), film(0.69), died(0.66), actor(0.66), she(0.64)
+  Rocchio : trees(0.24), one(0.06), represented(0.06), paper(0.05), forest(0.05), node(0.04), watts(0.03), adaptation(0.03)
+  HyDE    : malick(0.22), released(0.15), one(0.13), directed(0.13), film(0.11), jack(0.08), role(0.07), integral(0.06)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 73630
+  Text: "The Selma to Montgomery marches were a failure to demonstrate the desire of African-American citizens to exercise their constitutional right to vote."
+  SPLADE  : march(1.53), bam(1.37), voting(1.33), failed(1.10), marching(1.03), alabama(1.03), fail(0.97), rights(0.92), africa(0.91), because(0.85)
+  Rocchio : alabama(0.10), city(0.08), chestnut(0.07), sheyann(0.07), federal(0.05), one(0.05), march(0.04), several(0.04)
+  HyDE    : march(0.10), series(0.07), lewis(0.07), television(0.06), civil(0.05), historical(0.05), outrage(0.05), alabama(0.05)
+  Overlap(SPLADE,Rocchio) = 0.071  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.176
+  Shared by all three: alabama, march
+
+Query ID: 35754
+  Text: "Joseph Merrick was a man in the 19th century with perfect features."
+  SPLADE  : ##rick(2.48), mer(2.28), 19th(1.64), joe(1.25), founder(1.05), early(0.70), celebrity(0.66), 1800s(0.65), actor(0.65), he(0.64)
+  Rocchio : elephant(0.26), john(0.09), film(0.08), directed(0.07), company(0.06), received(0.06), adapted(0.06), hofsiss(0.06)
+  HyDE    : body(0.27), appearance(0.25), physical(0.19), elephant(0.15), including(0.11), characterized(0.11), condition(0.10), carey(0.08)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 207669
+  Text: "Andrew Carnegie has a 1889 article proclaiming ``The Gospel of Wealth''."
+  SPLADE  : rich(1.26), ##claiming(1.20), articles(1.14), church(0.99), 1889(0.98), pro(0.93), early(0.91), fortune(0.91), proclaimed(0.85), founder(0.81)
+  Rocchio : company(0.21), comedy(0.07), wealthtv(0.07), one(0.07), directed(0.06), essay(0.06), television(0.06), material(0.06)
+  HyDE    : distribution(0.15), essay(0.11), use(0.09), economic(0.07), moral(0.05), industrial(0.05), indeed(0.05), considered(0.05)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+
+Query ID: 154072
+  Text: "Honeymoon is Lana Del Rey's fifth album."
+  SPLADE  : vacation(1.50), marriage(1.27), this(1.08), albums(1.07), wedding(0.98), five(0.96), song(0.94), sixth(0.94), she(0.86), singer(0.81)
+  Rocchio : released(0.20), release(0.09), received(0.07), one(0.06), beach(0.05), featured(0.05), peaked(0.05), die(0.04)
+  HyDE    : released(0.29), release(0.14), studio(0.11), die(0.11), country(0.10), included(0.08), lust(0.07), indeed(0.07)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.250
+  Shared by all three: released
+
+Query ID: 219173
+  Text: "Species distribution can be understood through only through speciation."
+  SPLADE  : spec(1.74), ##iation(1.66), understand(1.42), flora(1.31), distributed(1.18), darwin(0.91), defined(0.72), understanding(0.59), extinction(0.58), by(0.57)
+  Rocchio : one(0.08), genetic(0.05), evolution(0.05), mayr(0.04), range(0.04), ernst(0.04), extinction(0.04), may(0.03)
+  HyDE    : including(0.16), indeed(0.09), competition(0.07), critical(0.07), however(0.07), fundamental(0.06), determinant(0.06), claim(0.06)
+  Overlap(SPLADE,Rocchio) = 0.071  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
+
+Query ID: 46582
+  Text: "Shannon Lee was born in 1234."
+  SPLADE  : 123(2.25), birth(1.55), she(1.02), early(0.85), 13th(0.80), date(0.76), birthday(0.72), her(0.71), nationality(0.46), age(0.41)
+  Rocchio : fantastic(0.25), williams(0.12), arts(0.11), martial(0.11), series(0.08), four(0.08), marvel(0.08), released(0.07)
+  HyDE    : arts(0.23), martial(0.22), historical(0.18), including(0.13), bruce(0.12), renowned(0.10), claim(0.08), birth(0.08)
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.111
+
+Query ID: 169317
+  Text: "The Woman in Black was produced by Hammer Film Productions in 2012."
+  SPLADE  : women(1.59), 2012(1.03), movie(0.99), date(0.97), she(0.88), early(0.80), production(0.80), company(0.71), artist(0.70), films(0.70)
+  Rocchio : series(0.18), released(0.17), directed(0.13), company(0.08), films(0.07), including(0.07), one(0.07), story(0.07)
+  HyDE    : adaptation(0.30), films(0.25), directed(0.14), title(0.12), adapted(0.12), james(0.11), horror(0.09), incorrect(0.08)
+  Overlap(SPLADE,Rocchio) = 0.111  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.176
+  Shared by all three: films
+
+Query ID: 98866
+  Text: "Georgians barely arose from the ancient Iberian civilizations."
+  SPLADE  : georgian(2.47), georgia(2.09), civilization(1.10), ga(1.03), tbilisi(1.00), originated(0.93), origin(0.87), nationality(0.86), were(0.72), portugal(0.71)
+  Rocchio : georgian(0.17), iberia(0.12), guaram(0.08), official(0.07), medieval(0.07), patronqmoba(0.05), qmoba(0.05), regional(0.05)
+  HyDE    : historical(0.25), cultural(0.20), georgian(0.12), identity(0.10), georgia(0.09), indeed(0.08), including(0.08), political(0.08)
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.111
+  Shared by all three: georgian
+
+AGGREGATE OVERLAP STATISTICS
+------------------------------------------------------------
+  Mean Jaccard(SPLADE, Rocchio) = 0.0284
+  Mean Jaccard(SPLADE, HyDE)    = 0.0305
+  Mean Jaccard(Rocchio, HyDE)   = 0.0874
+
+DISAGREEMENT CASE STUDIES
+====================================================================================================
+
+Case 1: Query "Shomu Mukherjee died at the age of 64." (ID: 26525)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##jee, ##mu, 64, death, die, india, kumar, old
+  Rocchio-only terms: bollywood, film, filmalaya, kajol, mukerji, produced, samarth, sashadhar
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
+Case 2: Query "Reanimation is not a remix album." (ID: 48936)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##ani, ##mation, albums, copyright, fake, parody, re, remixes
+  Rocchio-only terms: band, crunk, hybrid, including, jay, linkin, mixed, produced
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
+Case 3: Query "Yvonne Strahovski's real last name is Strzechowski." (ID: 3967)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##ech, ##ov, ##owski, ##rah, ##rz, ##ski, nationality, poland
+  Rocchio-only terms: astronaut, chuck, however, include, mass, miranda, received, series
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+

@@ -5,3 +5,4 @@ faiss-cpu
 torch
 pytrec-eval-terrier
 matplotlib
+transformers>=4.30.0
