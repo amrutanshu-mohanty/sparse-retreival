@@ -1,7 +1,0 @@
-Dataset Report Deliverables
-===========================
-Dataset: scifact
- - Corpus Size: 5,183 documents
- - Number of Queries (test split): 300
- - Index Build Time: 1.76 seconds
- - On-Disk Index Size: 10.09 MB

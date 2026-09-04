@@ -88,7 +88,7 @@ def prepare_dataset(dataset_name: str, output_dir: Path):
                         text_stream = io.TextIOWrapper(corpus_file, encoding='utf-8')
                         for line in tqdm(text_stream, desc="Processing Docs (Zip Stream)"):
                             doc_data = json.loads(line)
-                            doc_id = doc_data.get('_id', doc_data.get('id', ''))
+                            doc_id = str(doc_data.get('_id', doc_data.get('id', '')))
                             title = doc_data.get('title', '')
                             text = doc_data.get('text', '')
                             
@@ -121,7 +121,7 @@ def prepare_dataset(dataset_name: str, output_dir: Path):
                     contents = title or text
                     
                 pyserini_doc = {
-                    "id": doc.doc_id,
+                    "id": str(doc.doc_id),
                     "contents": contents
                 }
                 f.write(json.dumps(pyserini_doc) + '\n')
@@ -214,7 +214,7 @@ def demonstrate_index_reader(index_dir: Path):
 def main():
     parser = argparse.ArgumentParser(description="Build Pyserini indexes for BEIR datasets.")
     parser.add_argument("--datasets", nargs='+', default=['scifact'], 
-                        help="List of datasets to process (e.g., scifact fever hotpotqa)")
+                        help="List of datasets to process (e.g., scifact fever hotpotqa msmarco)")
     args = parser.parse_args()
 
     base_dir = Path.cwd()

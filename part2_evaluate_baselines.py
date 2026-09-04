@@ -33,7 +33,6 @@ def setup_java():
             os.environ["PATH"] = os.pathsep.join(paths)
 
 setup_java()
-os.environ["OPENAI_API_KEY"] = "dummy"
 
 from pyserini.search.lucene import LuceneSearcher
 from pyserini.pyclass import autoclass
@@ -197,7 +196,8 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     dev_split_map = {
         'scifact': 'beir/scifact/train',
         'fever': 'beir/fever/dev',
-        'hotpotqa': 'beir/hotpotqa/dev'
+        'hotpotqa': 'beir/hotpotqa/dev',
+        'msmarco': 'beir/msmarco/dev'
     }
     
     dev_ds_id = dev_split_map.get(dataset_name, f"beir/{dataset_name}/dev")
@@ -205,7 +205,7 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
         dev_queries, dev_qrels = load_dataset_queries_and_qrels(dev_ds_id)
         if len(dev_queries) > 1000:
             print(f"Subsampling 1,000 dev queries from {len(dev_queries)} for grid tuning speed...")
-            sampled_qids = rng.sample(list(dev_queries.keys()),1000)
+            sampled_qids = rng.sample(list(dev_queries.keys()), 1000)
             dev_queries = {qid: dev_queries[qid] for qid in sampled_qids}
             dev_qrels = {qid: dev_qrels[qid] for qid in sampled_qids if qid in dev_qrels}
     except Exception as e:
@@ -248,7 +248,8 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--datasets", nargs='+', default=['scifact', 'fever', 'hotpotqa'])
+    parser.add_argument("--datasets", nargs='+', default=['scifact', 'fever', 'hotpotqa', 'msmarco'],
+                        help="List of datasets to evaluate (e.g., scifact fever hotpotqa msmarco)")
     args = parser.parse_args()
     
     base_dir = Path.cwd()
@@ -281,7 +282,7 @@ def main():
         m_tfidf = res['tfidf']
         print(f"| Classic TF-IDF | {m_tfidf['nDCG@10']:.4f} | {m_tfidf['Recall@100']:.4f} | {m_tfidf['MRR@10']:.4f} | {m_tfidf['MAP']:.4f} |")
 
-    # Append or write summary report to part2_results.txt
+    # Write summary report to report.txt
     with open("part2_results.txt", "w") as f:
         f.write("Part 2: Sparse Retrieval Baselines Results\n")
         f.write("=========================================\n\n")
@@ -302,7 +303,7 @@ def main():
             f.write(f"{'Classic TF-IDF':<30} | {m_tfidf['nDCG@10']:<10.4f} | {m_tfidf['Recall@100']:<10.4f} | {m_tfidf['MRR@10']:<10.4f} | {m_tfidf['MAP']:<10.4f}\n")
             f.write("--------------------------------------------------------------------------------\n\n")
             
-    print("\nResults saved to part2_results.txt")
+    print("\nResults saved to report.txt")
 
 
 if __name__ == "__main__":

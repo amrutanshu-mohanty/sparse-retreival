@@ -19,3 +19,9 @@ Dataset: hotpotqa
  - Index Build Time: 423.77 seconds
  - On-Disk Index Size: 2.27 GB
 
+Dataset: msmarco
+ - Corpus Size: 8,841,823 documents
+ - Number of Queries (test split): 43
+ - Index Build Time: 372.65 seconds
+ - On-Disk Index Size: 4.02 GB
+
