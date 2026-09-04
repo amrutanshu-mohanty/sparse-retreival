@@ -3,13 +3,16 @@ import ir_datasets
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from transformers import AutoModelForMaskedLM, AutoTokenizer, AdamW
-from pyserini.search.lucene import LuceneSearcher
+from transformers import AutoModelForMaskedLM, AutoTokenizer
+from torch.optim import AdamW
+from part4_rocchio import LuceneSearcher
 from tqdm import tqdm
 import random
 import os
 import json
 from pathlib import Path
+
+import time
 
 # Fix random seed
 torch.manual_seed(42)
@@ -129,7 +132,7 @@ def collate_fn(batch, tokenizer):
     return q_enc, pos_enc, neg_enc
 
 def train_splade():
-    parser = argparse.add_argument_group("Training Arguments")
+    parser = argparse.ArgumentParser(description="Training Arguments")
     parser.add_argument("--epochs", type=int, default=5, help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=8, help="Batch size")
     parser.add_argument("--lr", type=float, default=2e-5, help="Learning rate")
@@ -139,6 +142,8 @@ def train_splade():
     parser.add_argument("--output_dir", type=str, default="splade_finetuned_scifact", help="Output directory")
     args = parser.parse_args()
 
+    start_time = time.time()
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
@@ -225,8 +230,12 @@ def train_splade():
     os.makedirs(args.output_dir, exist_ok=True)
     model.save_pretrained(args.output_dir)
     tokenizer.save_pretrained(args.output_dir)
-    print("Training complete!")
+    
+    total_time = time.time() - start_time
+    hours, rem = divmod(total_time, 3600)
+    minutes, seconds = divmod(rem, 60)
+    print(f"Training complete! Total time elapsed: {int(hours)}h {int(minutes)}m {int(seconds)}s")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Train custom SPLADE model on SciFact")
+    import time
     train_splade()

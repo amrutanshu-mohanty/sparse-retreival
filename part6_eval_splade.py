@@ -128,12 +128,12 @@ def evaluate_custom_splade(model_dir: str, dataset_name: str = "scifact"):
         report_lines.append(f"  Text: {qtext}")
         
         # Pretrained
-        pt_terms = pretrained_extractor.extract_expansion_terms(qtext, top_k=10)
+        _, pt_terms = pretrained_extractor.extract_expansion_terms(qtext, top_k=10)
         pt_str = ", ".join([f"{term}({weight:.2f})" for term, weight in pt_terms])
         report_lines.append(f"  Pretrained: {pt_str}")
         
         # Custom
-        ct_terms = custom_extractor.extract_expansion_terms(qtext, top_k=10)
+        _, ct_terms = custom_extractor.extract_expansion_terms(qtext, top_k=10)
         ct_str = ", ".join([f"{term}({weight:.2f})" for term, weight in ct_terms])
         report_lines.append(f"  Fine-tuned: {ct_str}")
         report_lines.append("")

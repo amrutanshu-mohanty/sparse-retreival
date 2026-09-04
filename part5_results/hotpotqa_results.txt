@@ -18,21 +18,21 @@ TABLE 2 — THREE-WAY EXPANSION TERM COMPARISON (15 queries)
 
 Query ID: 5ae628fd5542995703ce8b33
   Text: "Cinnamon sugar is a spice used to flavor this traditional Spanish and Portugese fried pastry."
-  SPLADE  : ##uge(2.16), port(1.56), fry(1.38), spices(1.26), pie(1.22), glucose(1.18), spain(1.16), ingredient(0.90), food(0.77), baker(0.69)
+  SPLADE  : fry(1.38), spices(1.26), pie(1.22), glucose(1.18), spain(1.16), ingredient(0.90), food(0.77), baker(0.69), foods(0.66), taste(0.64)
   Rocchio : khoshkar(0.16), reshteh(0.15), cruller(0.13), awameh(0.13), pie(0.12), dough(0.11), arabic(0.11), bean(0.11)
   HyDE    : aleo(0.16), sweet(0.11), preparation(0.10), ingredient(0.10), many(0.09), key(0.08), dough(0.08), dessert(0.07)
   Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.053
 
 Query ID: 5a713ea95542994082a3e6e4
   Text: "Alvaro Mexia had a diplomatic mission with which tribe of indigenous people?"
-  SPLADE  : ##xia(1.61), me(1.18), tribes(0.85), was(0.72), aboriginal(0.71), spain(0.67), native(0.66), diplomacy(0.63), ambassador(0.62), mexico(0.56)
+  SPLADE  : tribes(0.85), was(0.72), aboriginal(0.71), spain(0.67), native(0.66), diplomacy(0.63), ambassador(0.62), mexico(0.56), were(0.56), priest(0.53)
   Rocchio : chumash(0.22), ynez(0.14), brazil(0.12), resident(0.12), santa(0.11), country(0.10), several(0.09), population(0.09)
   HyDE    : one(0.10), timucua(0.09), trade(0.08), taino(0.08), european(0.07), interaction(0.07), caribbean(0.06), cultural(0.06)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
 
 Query ID: 5ae022ab554299025d62a428
   Text: "Which genus is native to arid or semi-desert areas, Alopecurus or Echeveria?"
-  SPLADE  : species(1.20), genera(1.12), ##ver(1.06), habitat(0.93), deserts(0.83), ##ia(0.76), ##ope(0.73), al(0.71), ##rus(0.66), ##he(0.60)
+  SPLADE  : species(1.20), genera(1.12), habitat(0.93), deserts(0.83), origin(0.41), plant(0.38), belong(0.38), subspecies(0.37), tree(0.33), breed(0.33)
   Rocchio : species(0.33), strictiflora(0.33), setosa(0.18), mexican(0.15), plant(0.12), savior(0.11), mexico(0.11), okanagan(0.10)
   HyDE    : adapted(0.15), minimal(0.08), found(0.07), thrive(0.07), contrast(0.07), species(0.07), mexico(0.07), southwestern(0.06)
   Overlap(SPLADE,Rocchio) = 0.071  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.111
@@ -40,14 +40,14 @@ Query ID: 5ae022ab554299025d62a428
 
 Query ID: 5ae28b76554299495565daa8
   Text: "What three categories does income get levied under the Parliament of Australia's tax code?"
-  SPLADE  : levi(1.75), australian(1.37), category(1.18), taxes(1.11), types(0.98), congress(0.69), ##ed(0.69), levy(0.60), accounting(0.47), codes(0.43)
-  Rocchio : act(0.41), one(0.13), individual(0.08), revenue(0.08), business(0.07), important(0.07), personal(0.07), wealth(0.05)
+  SPLADE  : australian(1.37), category(1.18), taxes(1.11), types(0.98), congress(0.69), levy(0.60), accounting(0.47), codes(0.43), taxa(0.41), finance(0.41)
+  Rocchio : act(0.41), one(0.13), revenue(0.08), individual(0.08), business(0.07), important(0.07), personal(0.07), wealth(0.05)
   HyDE    : business(0.21), covers(0.12), company(0.07), professional(0.07), subject(0.05), exempt(0.05), purpose(0.05), certain(0.05)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
 
 Query ID: 5a7c9ead5542990527d554e4
   Text: "As of 2010, what was the population of the county that was named after the 13th Speaker of the House of Representatives?"
-  SPLADE  : 13th(1.35), karen(1.16), speakers(1.16), 13(1.03), congress(0.75), 2010(0.73), representative(0.64), senator(0.54), thirteenth(0.53), speech(0.52)
+  SPLADE  : karen(1.16), speakers(1.16), 13(1.03), congress(0.75), representative(0.64), senator(0.54), thirteenth(0.53), speech(0.52), vote(0.51), massachusetts(0.39)
   Rocchio : census(0.15), blackford(0.14), macon(0.14), lick(0.12), one(0.12), maine(0.09), town(0.08), ohio(0.08)
   HyDE    : census(0.25), cannon(0.23), illinois(0.10), specific(0.09), rayburn(0.09), joseph(0.09), bureau(0.08), data(0.07)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
@@ -61,28 +61,28 @@ Query ID: 5add21555542992ae4cec496
 
 Query ID: 5ab259b25542993be8fa98de
   Text: "What word or phrase is found in both the history of Belgium and cockfighting?"
-  SPLADE  : cock(2.05), belgian(1.39), words(1.03), phrases(0.99), ##fighting(0.98), meaning(0.82), historical(0.81), fighting(0.80), fight(0.76), find(0.51)
+  SPLADE  : belgian(1.39), words(1.03), phrases(0.99), meaning(0.82), historical(0.81), fighting(0.80), fight(0.76), find(0.51), said(0.50), weapon(0.46)
   Rocchio : many(0.17), defined(0.17), belgicism(0.11), adverb(0.11), judicial(0.08), useful(0.08), one(0.08), french(0.07)
   HyDE    : belgian(0.11), symbol(0.09), cockerel(0.08), cultural(0.08), worn(0.07), context(0.07), pigeon(0.06), many(0.05)
-  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.053
+  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.053
 
 Query ID: 5a8aed1555429970aeb70334
   Text: "What vehicle, made by UROVESA, is most like the four-wheel drive military light truck produced by AM General?"
-  SPLADE  : ##ove(1.62), ur(1.27), model(0.98), vehicles(0.89), trucks(0.88), manufactured(0.73), ##sa(0.72), army(0.59), manufacturer(0.58), similar(0.56)
+  SPLADE  : model(0.98), vehicles(0.89), trucks(0.88), manufactured(0.73), army(0.59), manufacturer(0.58), similar(0.56), company(0.55), car(0.50), cars(0.42)
   Rocchio : uro(0.20), jeep(0.12), vamtac(0.08), terrain(0.08), use(0.08), gun(0.08), purpose(0.07), specific(0.07)
   HyDE    : hmmwv(0.15), making(0.14), various(0.11), shares(0.09), eroc(0.08), several(0.08), robust(0.06), road(0.06)
-  Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
+  Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
 
 Query ID: 5a85e24a5542994775f6067f
   Text: "Are Hoodoo Gurus and Pierre Bouvier of the same nationality?"
-  SPLADE  : hood(1.68), ##vier(1.65), ##oo(1.60), guru(1.52), bo(1.00), different(0.71), ethnic(0.63), ##u(0.55), citizenship(0.50), he(0.43)
+  SPLADE  : different(0.71), ethnic(0.63), citizenship(0.50), he(0.43), character(0.42), religion(0.37), founder(0.32), origin(0.31), gay(0.31), yes(0.31)
   Rocchio : released(0.41), produced(0.18), album(0.14), release(0.12), group(0.10), leilani(0.09), crank(0.08), rock(0.08)
   HyDE    : australian(0.14), formed(0.13), french(0.12), band(0.09), individual(0.09), rock(0.09), musical(0.08), information(0.08)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.111
 
 Query ID: 5a7c68575542996dd594b91c
   Text: "What was the sequel of the game that e was published by U.S. Gold in 1992?"
-  SPLADE  : 1992(1.75), sequels(1.31), us(1.30), 1991(1.28), games(1.08), publishing(1.03), film(0.84), early(0.81), 1993(0.76), date(0.68)
+  SPLADE  : sequels(1.31), us(1.30), 1991(1.28), games(1.08), publishing(1.03), film(0.84), early(0.81), 1993(0.76), date(0.68), successor(0.64)
   Rocchio : developed(0.36), released(0.18), flashback(0.16), europe(0.15), strider(0.14), company(0.10), video(0.09), identity(0.09)
   HyDE    : question(0.22), released(0.20), provide(0.19), specific(0.15), information(0.12), answer(0.11), crimson(0.09), one(0.09)
   Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.053
@@ -90,14 +90,14 @@ Query ID: 5a7c68575542996dd594b91c
 
 Query ID: 5a80a25d5542995d8a8ddfb7
   Text: "What is the name of the vocalist who collaborated with the rap duo who won the 2002 Grammy Award for Best Rap Performance by a Duo or Group?"
-  SPLADE  : 2002(1.52), singer(1.06), rapper(0.96), 2003(0.88), awards(0.83), win(0.78), song(0.78), collaboration(0.74), singers(0.68), actor(0.67)
-  Rocchio : pepa(0.11), skillz(0.10), previously(0.09), play(0.08), solo(0.08), salt(0.07), one(0.05), deidra(0.05)
+  SPLADE  : singer(1.06), rapper(0.96), 2003(0.88), awards(0.83), win(0.78), song(0.78), collaboration(0.74), singers(0.68), actor(0.67), artist(0.66)
+  Rocchio : pepa(0.11), skillz(0.10), previously(0.09), play(0.08), solo(0.08), salt(0.07), one(0.05), formed(0.05)
   HyDE    : outkast(0.28), winning(0.18), boi(0.17), big(0.17), question(0.15), benjamin(0.10), answer(0.10), need(0.08)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
 
 Query ID: 5ae07e5b55429945ae959381
   Text: "Drachen Fire was a roller coaster located behind which suspended coaster at Busch Gardens Williamsburg?"
-  SPLADE  : ##ache(1.66), dr(1.59), ##ach(1.46), burn(0.91), ride(0.89), park(0.84), ##n(0.73), virginia(0.69), tower(0.57), museum(0.56)
+  SPLADE  : ##ach(1.46), burn(0.91), ride(0.89), park(0.84), virginia(0.69), tower(0.57), museum(0.56), station(0.52), stadium(0.51), model(0.45)
   Rocchio : ness(0.10), ride(0.10), closed(0.09), loch(0.09), maus(0.09), situated(0.08), monster(0.08), featured(0.07)
   HyDE    : dragon(0.11), brawl(0.08), park(0.08), collection(0.08), making(0.07), allowed(0.07), stood(0.06), layout(0.06)
   Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.000
@@ -111,7 +111,7 @@ Query ID: 5a8aa1685542992d82986f32
 
 Query ID: 5a78b5f7554299148911f95b
   Text: "Spawn, a fictional character who Mustafa Shakir has expressed interest in playing, was created by?"
-  SPLADE  : ##kir(1.77), sha(1.29), spawning(0.98), play(0.82), characters(0.81), invented(0.73), actor(0.63), film(0.61), game(0.58), steve(0.54)
+  SPLADE  : spawning(0.98), play(0.82), characters(0.81), invented(0.73), actor(0.63), film(0.61), game(0.58), steve(0.54), alien(0.53), creator(0.52)
   Rocchio : salim(0.18), malebolgia(0.16), comic(0.13), may(0.12), characters(0.10), attended(0.09), department(0.09), famous(0.08)
   HyDE    : series(0.29), todd(0.20), comic(0.15), producer(0.12), book(0.10), films(0.09), various(0.09), renowned(0.07)
   Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.111
@@ -126,7 +126,7 @@ Query ID: 5a779fd95542997042120ab5
 AGGREGATE OVERLAP STATISTICS
 ------------------------------------------------------------
   Mean Jaccard(SPLADE, Rocchio) = 0.0209
-  Mean Jaccard(SPLADE, HyDE)    = 0.0212
+  Mean Jaccard(SPLADE, HyDE)    = 0.0237
   Mean Jaccard(Rocchio, HyDE)   = 0.0542
 
 DISAGREEMENT CASE STUDIES
@@ -134,7 +134,7 @@ DISAGREEMENT CASE STUDIES
 
 Case 1: Query "Alvaro Mexia had a diplomatic mission with which tribe of indigenous people?" (ID: 5a713ea95542994082a3e6e4)
   Jaccard(SPLADE, Rocchio) = 0.000
-  SPLADE-only terms : ##xia, aboriginal, ambassador, diplomacy, me, mexico, native, spain
+  SPLADE-only terms : aboriginal, ambassador, diplomacy, mexico, native, priest, spain, tribes
   Rocchio-only terms: brazil, chumash, country, living, population, resident, samala, santa
   Discussion: SPLADE learns contextual expansion via MLM pretraining,
   producing semantically related terms. Rocchio relies on term frequency
@@ -142,7 +142,7 @@ Case 1: Query "Alvaro Mexia had a diplomatic mission with which tribe of indigen
 
 Case 2: Query "What three categories does income get levied under the Parliament of Australia's tax code?" (ID: 5ae28b76554299495565daa8)
   Jaccard(SPLADE, Rocchio) = 0.000
-  SPLADE-only terms : ##ed, accounting, australian, category, codes, congress, levi, levy
+  SPLADE-only terms : accounting, australian, category, codes, congress, finance, levy, taxa
   Rocchio-only terms: act, business, capital, collection, important, individual, one, personal
   Discussion: SPLADE learns contextual expansion via MLM pretraining,
   producing semantically related terms. Rocchio relies on term frequency
@@ -150,7 +150,7 @@ Case 2: Query "What three categories does income get levied under the Parliament
 
 Case 3: Query "As of 2010, what was the population of the county that was named after the 13th Speaker of the House of Representatives?" (ID: 5a7c9ead5542990527d554e4)
   Jaccard(SPLADE, Rocchio) = 0.000
-  SPLADE-only terms : 13, 13th, 2010, congress, karen, representative, senator, speakers
+  SPLADE-only terms : 13, congress, karen, massachusetts, representative, senator, speakers, speech
   Rocchio-only terms: blackford, census, kirk, lick, macon, maine, ohio, one
   Discussion: SPLADE learns contextual expansion via MLM pretraining,
   producing semantically related terms. Rocchio relies on term frequency

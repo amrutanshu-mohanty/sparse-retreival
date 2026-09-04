@@ -115,8 +115,14 @@ class SpladeTermExtractor:
         expansion_terms are sorted by weight descending.
         """
         sparse_vec = self.get_sparse_vector(query_text)
-        # Identify query tokens to separate expansion terms
-        query_tokens_lower = set(re.findall(r'\b[a-zA-Z]+\b', query_text.lower()))
+        
+        # Get the original vocabulary units from the tokenized query
+        input_ids = self.tokenizer(query_text, add_special_tokens=False)["input_ids"]
+        query_tokens_lower = set()
+        for idx in input_ids:
+            token = self.tokenizer.decode([idx]).strip().lower()
+            query_tokens_lower.add(token)
+
         expansion = []
         for token, weight in sparse_vec.items():
             if token.lower() not in query_tokens_lower:
@@ -161,16 +167,7 @@ def init_impact_searcher(dataset_name: str, model_name: str):
     
     encoder = SpladeQueryEncoder(model_name)
     
-    try:
-        searcher = LuceneImpactSearcher.from_prebuilt_index(index_name, encoder)
-    except Exception as e:
-        print(f"  [WARN] from_prebuilt_index failed ({e}), trying alternate index name...")
-        alt_map = PREBUILT_INDEX_SPLADE_PP_ED if idx_map is PREBUILT_INDEX_SPLADE_V3 else PREBUILT_INDEX_SPLADE_V3
-        alt_name = alt_map.get(dataset_name)
-        if alt_name:
-            searcher = LuceneImpactSearcher.from_prebuilt_index(alt_name, encoder)
-        else:
-            raise
+    searcher = LuceneImpactSearcher.from_prebuilt_index(index_name, encoder)
     return searcher
 
 
@@ -425,6 +422,13 @@ def evaluate_dataset(dataset_name: str, model_name: str,
         print(f"SPLADE retrieval completed in {t_splade:.1f}s", flush=True)
         with open(splade_run_path, "w", encoding="utf-8") as f:
             json.dump(splade_run, f)
+            
+        # Free the Pyserini model from memory before loading the term extractor
+        del impact_searcher
+        import gc, torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
             
     splade_metrics, splade_per_q = compute_metrics_and_per_query(splade_run, qrels)
     print(f"SPLADE Metrics: nDCG@10={splade_metrics['nDCG@10']:.4f} "

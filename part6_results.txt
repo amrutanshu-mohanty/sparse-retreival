@@ -1,0 +1,59 @@
+Custom SPLADE Model Metrics (SciFact):
+nDCG@10    : 0.4837
+Recall@100 : 0.8294
+MRR@10     : 0.4409
+MAP        : 0.4408
+
+==================================================
+      EXPANSION TERM COMPARISON (10 QUERIES)
+==================================================
+
+Query ID: 1
+  Text: 0-dimensional biomaterials show inductive properties.
+  Pretrained: ##mate(1.59), bio(1.58), ind(1.53), ##uc(1.51), ##rial(1.43), zero(1.36), ##tive(1.24), property(0.93), dimensions(0.92), dimension(0.88)
+  Fine-tuned: the(1.04), fe(0.83), bio(0.81), ##uc(0.73), sol(0.57), im(0.52), chain(0.46), free(0.42), sugar(0.16), dna(0.09)
+
+Query ID: 3
+  Text: 1,000 genomes project enables mapping of genetic sequence variation consisting of rare variants with larger penetrance effects than common variants.
+  Pretrained: genome(2.03), ##rance(1.76), many(1.73), pen(1.43), projects(1.27), map(1.12), 000(1.11), variations(1.11), ##s(1.08), enable(0.96)
+  Fine-tuned: gene(1.44), dna(1.34), map(1.17), rna(1.04), genome(0.93), wild(0.75), mei(0.74), gen(0.64), transcript(0.56), variant(0.53)
+
+Query ID: 5
+  Text: 1/2000 in UK have abnormal PrP positivity.
+  Pretrained: pr(2.16), 2000(1.59), ##sit(1.59), ##p(1.25), ##ivity(1.17), 20(0.92), po(0.83), british(0.81), population(0.72), had(0.64)
+  Fine-tuned: pr(1.64), test(0.68), bt(0.50), sl(0.35), pop(0.17), control(0.13)
+
+Query ID: 13
+  Text: 5% of perinatal mortality is due to low birth weight.
+  Pretrained: ##ina(1.73), per(1.36), percent(1.24), ##tal(1.19), death(1.16), pregnancy(1.10), baby(1.06), obesity(0.88), die(0.87), lower(0.86)
+  Fine-tuned: child(1.45), baby(1.28), egg(1.27), death(0.89), fat(0.84), born(0.67), mast(0.62), risk(0.53), stage(0.50), normal(0.46)
+
+Query ID: 36
+  Text: A deficiency of vitamin B12 increases blood levels of homocysteine.
+  Pretrained: ##stein(2.12), homo(1.98), b1(1.61), ##cy(1.37), ##2(1.34), increase(1.30), nutritional(1.11), def(0.97), increased(0.92), raise(0.80)
+  Fine-tuned: b1(1.81), ##stein(1.79), cy(1.18), alpha(0.86), cox(0.81), ty(0.75), fat(0.73), milk(0.42), trans(0.39), gap(0.33)
+
+Query ID: 42
+  Text: A high microerythrocyte count raises vulnerability to severe anemia in homozygous alpha (+)- thalassemia trait subjects.
+  Pretrained: ##ery(2.16), ##emia(2.07), micro(1.82), homo(1.73), ##lass(1.64), ##cy(1.62), vulnerable(1.48), ##zy(1.47), ##ro(1.37), tha(1.29)
+  Fine-tuned: micro(1.43), ##zy(1.10), cy(1.06), cab(0.95), egg(0.83), adam(0.78), gene(0.64), th(0.46), cross(0.30), der(0.28)
+
+Query ID: 48
+  Text: A total of 1,000 people in the UK are asymptomatic carriers of vCJD infection.
+  Pretrained: vc(2.26), ##j(1.91), ##ym(1.52), ##oma(1.31), population(1.26), many(1.26), carrier(1.15), as(1.15), ##d(1.06), disease(1.00)
+  Fine-tuned: cab(1.15), ##d(0.80), fa(0.57), pan(0.57), bt(0.57), transmission(0.56), ad(0.42), ha(0.32), bag(0.29), cd(0.29)
+
+Query ID: 49
+  Text: ADAR1 binds to Dicer to cleave pre-miRNA.
+  Pretrained: ada(2.30), dice(2.25), mir(2.21), ##1(1.55), binding(1.46), ##ea(1.44), bind(1.38), ##r(1.20), inhibitor(1.14), ##na(1.10)
+  Fine-tuned: mir(1.74), ada(1.52), rna(1.32), map(1.19), ad(1.16), ram(0.94), dice(0.90), ar(0.87), sir(0.86), gene(0.84)
+
+Query ID: 50
+  Text: AIRE is expressed in some skin tumors.
+  Pretrained: air(2.93), ##e(1.69), tumor(1.56), expression(1.56), express(1.29), face(1.06), cancer(1.02), developed(0.65), gene(0.59), hormone(0.58)
+  Fine-tuned: air(2.00), cancer(1.65), tumor(1.55), ad(1.42), raf(1.05), aero(0.74), ang(0.71), ac(0.69), the(0.62), om(0.62)
+
+Query ID: 51
+  Text: ALDH1 expression is associated with better breast cancer outcomes.
+  Pretrained: ##dh(2.32), al(2.01), ##1(1.52), tumor(1.30), gene(0.99), inhibitor(0.86), outcome(0.73), hormone(0.71), dh(0.66), best(0.64)
+  Fine-tuned: al(1.54), ##dh(1.39), tumor(1.27), ar(1.16), gene(1.14), ad(1.02), ha(0.60), egg(0.60), gap(0.49), ##d(0.47)
