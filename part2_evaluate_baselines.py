@@ -307,7 +307,7 @@ def main():
         print(f"| Classic TF-IDF | {m_tfidf['nDCG@10']:.4f} | {m_tfidf['Recall@100']:.4f} | {m_tfidf['MRR@10']:.4f} | {m_tfidf['MAP']:.4f} | {res['lat_tfidf']:.2f} ms |")
 
     # Write summary report to report.txt
-    with open("report.txt", "w") as f:
+    with open("part2_results.txt", "w") as f:
         f.write("Part 2: Sparse Retrieval Baselines Results\n")
         f.write("=========================================\n\n")
         for res in all_results:
