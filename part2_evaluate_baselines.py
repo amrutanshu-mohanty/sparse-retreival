@@ -179,11 +179,43 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     print(f"          Evaluating Dataset: {dataset_name.upper()}")
     print(f"=======================================================")
     
-    # 1. Load test set
-    test_ds_id = f"beir/{dataset_name}/test"
-    test_queries, test_qrels = load_dataset_queries_and_qrels(test_ds_id)
-    num_queries = len(test_queries)
-    print(f"Loaded test set: {num_queries} queries, {len(test_qrels)} query qrel entries")
+    # 1. Load dataset splits
+    if dataset_name == 'msmarco':
+        print("Loading MSMARCO dev split for tuning & evaluation...")
+        all_dev_queries, all_dev_qrels = load_dataset_queries_and_qrels("beir/msmarco/dev")
+        all_qids = sorted(list(all_dev_queries.keys()))
+        tuning_qids = set(rng.sample(all_qids, min(1000, len(all_qids))))
+        eval_qids = [qid for qid in all_qids if qid not in tuning_qids]
+        
+        dev_queries = {qid: all_dev_queries[qid] for qid in tuning_qids}
+        dev_qrels = {qid: all_dev_qrels[qid] for qid in tuning_qids if qid in all_dev_qrels}
+        
+        test_queries = {qid: all_dev_queries[qid] for qid in eval_qids}
+        test_qrels = {qid: all_dev_qrels[qid] for qid in eval_qids if qid in all_dev_qrels}
+        num_queries = len(test_queries)
+        print(f"MSMARCO split: {len(dev_queries)} queries for parameter tuning, {num_queries} queries for evaluation (held-out dev).")
+    else:
+        test_ds_id = f"beir/{dataset_name}/test"
+        test_queries, test_qrels = load_dataset_queries_and_qrels(test_ds_id)
+        num_queries = len(test_queries)
+        print(f"Loaded test set: {num_queries} queries, {len(test_qrels)} query qrel entries")
+        
+        dev_split_map = {
+            'scifact': 'beir/scifact/train',
+            'fever': 'beir/fever/dev',
+            'hotpotqa': 'beir/hotpotqa/dev'
+        }
+        dev_ds_id = dev_split_map.get(dataset_name, f"beir/{dataset_name}/dev")
+        try:
+            dev_queries, dev_qrels = load_dataset_queries_and_qrels(dev_ds_id)
+            if len(dev_queries) > 1000:
+                print(f"Subsampling 1,000 dev queries from {len(dev_queries)} for grid tuning speed...")
+                sampled_qids = rng.sample(list(dev_queries.keys()), 1000)
+                dev_queries = {qid: dev_queries[qid] for qid in sampled_qids}
+                dev_qrels = {qid: dev_qrels[qid] for qid in sampled_qids if qid in dev_qrels}
+        except Exception as e:
+            print(f"Could not load dev split {dev_ds_id}: {e}. Using test split for tuning...")
+            dev_queries, dev_qrels = test_queries, test_qrels
     
     # 2. (a) Default BM25 (Pyserini default: k1=0.9, b=0.4)
     print("\n--- (a) Evaluating Default BM25 (k1=0.9, b=0.4) ---")
@@ -198,25 +230,6 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     
     # 3. (b) Parameter Tuning (Dev Split Grid Search)
     print("\n--- (b) BM25 Parameter Tuning (Grid Search) ---")
-    dev_split_map = {
-        'scifact': 'beir/scifact/train',
-        'fever': 'beir/fever/dev',
-        'hotpotqa': 'beir/hotpotqa/dev',
-        'msmarco': 'beir/msmarco/dev'
-    }
-    
-    dev_ds_id = dev_split_map.get(dataset_name, f"beir/{dataset_name}/dev")
-    try:
-        dev_queries, dev_qrels = load_dataset_queries_and_qrels(dev_ds_id)
-        if len(dev_queries) > 1000:
-            print(f"Subsampling 1,000 dev queries from {len(dev_queries)} for grid tuning speed...")
-            sampled_qids = rng.sample(list(dev_queries.keys()), 1000)
-            dev_queries = {qid: dev_queries[qid] for qid in sampled_qids}
-            dev_qrels = {qid: dev_qrels[qid] for qid in sampled_qids if qid in dev_qrels}
-    except Exception as e:
-        print(f"Could not load dev split {dev_ds_id}: {e}. Using test split for tuning...")
-        dev_queries, dev_qrels = test_queries, test_qrels
-        
     k1_grid = [0.3, 0.6, 0.9, 1.2, 1.6, 2.0]
     b_grid  = [0.1, 0.2, 0.4, 0.6, 0.75, 0.9] 
     
@@ -294,7 +307,7 @@ def main():
         print(f"| Classic TF-IDF | {m_tfidf['nDCG@10']:.4f} | {m_tfidf['Recall@100']:.4f} | {m_tfidf['MRR@10']:.4f} | {m_tfidf['MAP']:.4f} | {res['lat_tfidf']:.2f} ms |")
 
     # Write summary report to report.txt
-    with open("part2_results.txt", "w") as f:
+    with open("report.txt", "w") as f:
         f.write("Part 2: Sparse Retrieval Baselines Results\n")
         f.write("=========================================\n\n")
         for res in all_results:
