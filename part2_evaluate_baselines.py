@@ -32,8 +32,11 @@ def setup_java():
                 paths.insert(0, server_path)
             os.environ["PATH"] = os.pathsep.join(paths)
 
-setup_java()
+def setup_java_ubuntu():
+    os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-21-openjdk-amd64"
 
+setup_java_ubuntu()
+os.environ["OPENAI_API_KEY"] = "dummy"
 from pyserini.search.lucene import LuceneSearcher
 from pyserini.pyclass import autoclass
 import ir_datasets
@@ -179,7 +182,8 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     # 1. Load test set
     test_ds_id = f"beir/{dataset_name}/test"
     test_queries, test_qrels = load_dataset_queries_and_qrels(test_ds_id)
-    print(f"Loaded test set: {len(test_queries)} queries, {len(test_qrels)} query qrel entries")
+    num_queries = len(test_queries)
+    print(f"Loaded test set: {num_queries} queries, {len(test_qrels)} query qrel entries")
     
     # 2. (a) Default BM25 (Pyserini default: k1=0.9, b=0.4)
     print("\n--- (a) Evaluating Default BM25 (k1=0.9, b=0.4) ---")
@@ -188,8 +192,9 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     t0 = time.time()
     default_run = run_batch_search(searcher_bm25, test_queries, k=100)
     t_default = time.time() - t0
+    lat_default = (t_default / num_queries) * 1000.0 if num_queries > 0 else 0.0
     default_metrics = compute_metrics(default_run, test_qrels)
-    print(f"Default BM25 Results ({t_default:.2f}s): {default_metrics}")
+    print(f"Default BM25 Results (Total: {t_default:.2f}s, Latency: {lat_default:.2f} ms/q): {default_metrics}")
     
     # 3. (b) Parameter Tuning (Dev Split Grid Search)
     print("\n--- (b) BM25 Parameter Tuning (Grid Search) ---")
@@ -223,8 +228,9 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     t0 = time.time()
     tuned_run = run_batch_search(searcher_bm25, test_queries, k=100)
     t_tuned = time.time() - t0
+    lat_tuned = (t_tuned / num_queries) * 1000.0 if num_queries > 0 else 0.0
     tuned_metrics = compute_metrics(tuned_run, test_qrels)
-    print(f"Tuned BM25 Results ({t_tuned:.2f}s): {tuned_metrics}")
+    print(f"Tuned BM25 Results (Total: {t_tuned:.2f}s, Latency: {lat_tuned:.2f} ms/q): {tuned_metrics}")
     
     searcher_bm25.close()
     
@@ -233,13 +239,18 @@ def evaluate_dataset(dataset_name: str, index_dir: Path):
     t0 = time.time()
     tfidf_run = run_classic_tfidf_search(index_dir, test_queries, k=100)
     t_tfidf = time.time() - t0
+    lat_tfidf = (t_tfidf / num_queries) * 1000.0 if num_queries > 0 else 0.0
     tfidf_metrics = compute_metrics(tfidf_run, test_qrels)
-    print(f"Classic TF-IDF Results ({t_tfidf:.2f}s): {tfidf_metrics}")
+    print(f"Classic TF-IDF Results (Total: {t_tfidf:.2f}s, Latency: {lat_tfidf:.2f} ms/q): {tfidf_metrics}")
     
     return {
         'dataset': dataset_name,
         'best_k1': best_k1,
         'best_b': best_b,
+        'num_queries': num_queries,
+        'lat_default': lat_default,
+        'lat_tuned': lat_tuned,
+        'lat_tfidf': lat_tfidf,
         'default_bm25': default_metrics,
         'tuned_bm25': tuned_metrics,
         'tfidf': tfidf_metrics
@@ -261,26 +272,26 @@ def main():
         res = evaluate_dataset(ds_name, ds_index_dir)
         all_results.append(res)
         
-    print("\n" + "="*80)
-    print("                    PART 2 EXPERIMENT RESULTS SUMMARY")
-    print("="*80)
+    print("\n" + "="*95)
+    print("                           PART 2 EXPERIMENT RESULTS SUMMARY")
+    print("="*95)
     
     for res in all_results:
         ds = res['dataset'].upper()
         k1 = res['best_k1']
         b = res['best_b']
-        print(f"\n### Dataset: {ds} (Tuned BM25: k1={k1}, b={b})")
-        print(f"| Model | nDCG@10 | Recall@100 | MRR@10 | MAP |")
-        print(f"|---|---|---|---|---|")
+        print(f"\n### Dataset: {ds} ({res['num_queries']} test queries | Tuned BM25: k1={k1}, b={b})")
+        print(f"| Model | nDCG@10 | Recall@100 | MRR@10 | MAP | Latency (ms/q) |")
+        print(f"|---|---|---|---|---|---|")
         
         m_def = res['default_bm25']
-        print(f"| Default BM25 (k1=0.9, b=0.4) | {m_def['nDCG@10']:.4f} | {m_def['Recall@100']:.4f} | {m_def['MRR@10']:.4f} | {m_def['MAP']:.4f} |")
+        print(f"| Default BM25 (k1=0.9, b=0.4) | {m_def['nDCG@10']:.4f} | {m_def['Recall@100']:.4f} | {m_def['MRR@10']:.4f} | {m_def['MAP']:.4f} | {res['lat_default']:.2f} ms |")
         
         m_tun = res['tuned_bm25']
-        print(f"| Tuned BM25 (k1={k1}, b={b}) | {m_tun['nDCG@10']:.4f} | {m_tun['Recall@100']:.4f} | {m_tun['MRR@10']:.4f} | {m_tun['MAP']:.4f} |")
+        print(f"| Tuned BM25 (k1={k1}, b={b}) | {m_tun['nDCG@10']:.4f} | {m_tun['Recall@100']:.4f} | {m_tun['MRR@10']:.4f} | {m_tun['MAP']:.4f} | {res['lat_tuned']:.2f} ms |")
         
         m_tfidf = res['tfidf']
-        print(f"| Classic TF-IDF | {m_tfidf['nDCG@10']:.4f} | {m_tfidf['Recall@100']:.4f} | {m_tfidf['MRR@10']:.4f} | {m_tfidf['MAP']:.4f} |")
+        print(f"| Classic TF-IDF | {m_tfidf['nDCG@10']:.4f} | {m_tfidf['Recall@100']:.4f} | {m_tfidf['MRR@10']:.4f} | {m_tfidf['MAP']:.4f} | {res['lat_tfidf']:.2f} ms |")
 
     # Write summary report to report.txt
     with open("part2_results.txt", "w") as f:
@@ -290,20 +301,20 @@ def main():
             ds = res['dataset'].upper()
             k1 = res['best_k1']
             b = res['best_b']
-            f.write(f"Dataset: {ds}\n")
+            f.write(f"Dataset: {ds} ({res['num_queries']} test queries)\n")
             f.write(f"Tuned Parameters: k1 = {k1}, b = {b}\n")
-            f.write("--------------------------------------------------------------------------------\n")
-            f.write(f"{'Model':<30} | {'nDCG@10':<10} | {'Recall@100':<10} | {'MRR@10':<10} | {'MAP':<10}\n")
-            f.write("--------------------------------------------------------------------------------\n")
+            f.write("----------------------------------------------------------------------------------------------------\n")
+            f.write(f"{'Model':<30} | {'nDCG@10':<10} | {'Recall@100':<10} | {'MRR@10':<10} | {'MAP':<10} | {'Latency (ms/q)':<15}\n")
+            f.write("----------------------------------------------------------------------------------------------------\n")
             m_def = res['default_bm25']
-            f.write(f"{'Default BM25 (k1=0.9, b=0.4)':<30} | {m_def['nDCG@10']:<10.4f} | {m_def['Recall@100']:<10.4f} | {m_def['MRR@10']:<10.4f} | {m_def['MAP']:<10.4f}\n")
+            f.write(f"{'Default BM25 (k1=0.9, b=0.4)':<30} | {m_def['nDCG@10']:<10.4f} | {m_def['Recall@100']:<10.4f} | {m_def['MRR@10']:<10.4f} | {m_def['MAP']:<10.4f} | {res['lat_default']:<15.2f}\n")
             m_tun = res['tuned_bm25']
-            f.write(f"{f'Tuned BM25 (k1={k1}, b={b})':<30} | {m_tun['nDCG@10']:<10.4f} | {m_tun['Recall@100']:<10.4f} | {m_tun['MRR@10']:<10.4f} | {m_tun['MAP']:<10.4f}\n")
+            f.write(f"{f'Tuned BM25 (k1={k1}, b={b})':<30} | {m_tun['nDCG@10']:<10.4f} | {m_tun['Recall@100']:<10.4f} | {m_tun['MRR@10']:<10.4f} | {m_tun['MAP']:<10.4f} | {res['lat_tuned']:<15.2f}\n")
             m_tfidf = res['tfidf']
-            f.write(f"{'Classic TF-IDF':<30} | {m_tfidf['nDCG@10']:<10.4f} | {m_tfidf['Recall@100']:<10.4f} | {m_tfidf['MRR@10']:<10.4f} | {m_tfidf['MAP']:<10.4f}\n")
-            f.write("--------------------------------------------------------------------------------\n\n")
+            f.write(f"{'Classic TF-IDF':<30} | {m_tfidf['nDCG@10']:<10.4f} | {m_tfidf['Recall@100']:<10.4f} | {m_tfidf['MRR@10']:<10.4f} | {m_tfidf['MAP']:<10.4f} | {res['lat_tfidf']:<15.2f}\n")
+            f.write("----------------------------------------------------------------------------------------------------\n\n")
             
-    print("\nResults saved to report.txt")
+    print("\nResults saved to part2_results.txt")
 
 
 if __name__ == "__main__":
