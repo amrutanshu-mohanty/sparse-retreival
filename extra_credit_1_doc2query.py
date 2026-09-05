@@ -157,6 +157,19 @@ class OllamaDoc2QueryGenerator:
         self.url = url
         self.temperature = temperature
         self.max_tokens = max_tokens
+        self._gpu_checked = False
+        
+        print(f"Loading Ollama model '{self.model}'...", flush=True)
+        try:
+            import torch
+            cuda_available = torch.cuda.is_available()
+            print(f"System CUDA Available (PyTorch): {cuda_available}", flush=True)
+            if cuda_available:
+                print(f"Detected GPU: {torch.cuda.get_device_name(0)}. Ollama should automatically use this.", flush=True)
+            else:
+                print("WARNING: No CUDA detected on system. Ollama will likely use CPU.", flush=True)
+        except ImportError:
+            pass
 
     def generate(self, prompt: str, max_retries: int = 3) -> str:
         payload = {
@@ -172,6 +185,22 @@ class OllamaDoc2QueryGenerator:
             try:
                 resp = requests.post(self.url, json=payload, timeout=60)
                 if resp.status_code == 200:
+                    if not self._gpu_checked:
+                        self._gpu_checked = True
+                        try:
+                            # Verify if Ollama actually loaded it into VRAM
+                            ps_url = self.url.replace("/generate", "/ps")
+                            ps_resp = requests.get(ps_url, timeout=5)
+                            if ps_resp.status_code == 200:
+                                for m in ps_resp.json().get("models", []):
+                                    if m.get("name") == self.model or self.model in m.get("name"):
+                                        vram = m.get("size_vram", 0)
+                                        if vram > 0:
+                                            print(f"\n---> [VERIFIED] Ollama is actively using the GPU! (VRAM offloaded: {vram / (1024**2):.0f} MB)\n", flush=True)
+                                        else:
+                                            print(f"\n---> [WARNING] Ollama is running this model on CPU! (0 VRAM offloaded)\n", flush=True)
+                        except Exception:
+                            pass
                     return resp.json().get("response", "").strip()
             except Exception:
                 time.sleep(1.0 * (attempt + 1))
@@ -186,12 +215,24 @@ class HuggingFaceDoc2QueryGenerator:
         from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
         print(f"Loading HuggingFace model '{model_name}' on device '{device}'...", flush=True)
-        if device == "cuda" or (device == "auto" and torch.cuda.is_available()):
+        
+        # Explicit CUDA check and print
+        cuda_available = torch.cuda.is_available()
+        print(f"CUDA Available (PyTorch): {cuda_available}", flush=True)
+        if cuda_available:
+            print(f"CUDA Device Count: {torch.cuda.device_count()}", flush=True)
+            print(f"CUDA Device Name (0): {torch.cuda.get_device_name(0)}", flush=True)
+        else:
+            print("WARNING: CUDA is not available to PyTorch! Falling back to CPU.", flush=True)
+
+        if device == "cuda" or (device == "auto" and cuda_available):
             torch_dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
             device_map = "auto"
+            print(f"Configured to use GPU(s) with dtype {torch_dtype}", flush=True)
         else:
             torch_dtype = torch.float32
             device_map = "cpu"
+            print("Configured to use CPU", flush=True)
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModelForCausalLM.from_pretrained(
