@@ -41,7 +41,7 @@ Query ID: 5ae022ab554299025d62a428
 Query ID: 5ae28b76554299495565daa8
   Text: "What three categories does income get levied under the Parliament of Australia's tax code?"
   SPLADE  : australian(1.37), category(1.18), taxes(1.11), types(0.98), congress(0.69), levy(0.60), accounting(0.47), codes(0.43), taxa(0.41), finance(0.41)
-  Rocchio : act(0.41), one(0.13), revenue(0.08), individual(0.08), business(0.07), important(0.07), personal(0.07), wealth(0.05)
+  Rocchio : act(0.41), one(0.13), individual(0.08), revenue(0.08), business(0.07), important(0.07), personal(0.07), wealth(0.05)
   HyDE    : business(0.21), covers(0.12), company(0.07), professional(0.07), subject(0.05), exempt(0.05), purpose(0.05), certain(0.05)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.053
 
@@ -62,7 +62,7 @@ Query ID: 5add21555542992ae4cec496
 Query ID: 5ab259b25542993be8fa98de
   Text: "What word or phrase is found in both the history of Belgium and cockfighting?"
   SPLADE  : belgian(1.39), words(1.03), phrases(0.99), meaning(0.82), historical(0.81), fighting(0.80), fight(0.76), find(0.51), said(0.50), weapon(0.46)
-  Rocchio : many(0.17), defined(0.17), belgicism(0.11), adverb(0.11), judicial(0.08), useful(0.08), one(0.08), french(0.07)
+  Rocchio : many(0.17), defined(0.17), belgicism(0.11), adverb(0.11), useful(0.08), judicial(0.08), one(0.08), french(0.07)
   HyDE    : belgian(0.11), symbol(0.09), cockerel(0.08), cultural(0.08), worn(0.07), context(0.07), pigeon(0.06), many(0.05)
   Overlap(SPLADE,Rocchio) = 0.000  Overlap(SPLADE,HyDE) = 0.071  Overlap(Rocchio,HyDE) = 0.053
 

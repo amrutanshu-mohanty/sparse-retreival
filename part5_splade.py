@@ -49,7 +49,10 @@ def setup_java():
                 paths.insert(0, server_path)
             os.environ["PATH"] = os.pathsep.join(paths)
 
-setup_java()
+def setup_java_ubuntu():
+    os.environ["JAVA_HOME"] = "/usr/lib/jvm/java-21-openjdk-amd64"
+
+setup_java_ubuntu()
 os.environ["OPENAI_API_KEY"] = "dummy"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -139,12 +142,14 @@ PREBUILT_INDEX_SPLADE_PP_ED = {
     "scifact":  "beir-v1.0.0-scifact.splade-pp-ed",
     "fever":    "beir-v1.0.0-fever.splade-pp-ed",
     "hotpotqa": "beir-v1.0.0-hotpotqa.splade-pp-ed",
+    "msmarco":  "msmarco-v1-passage.splade-pp-ed",
 }
 
 PREBUILT_INDEX_SPLADE_V3 = {
     "scifact":  "beir-v1.0.0-scifact.splade-v3",
     "fever":    "beir-v1.0.0-fever.splade-v3",
     "hotpotqa": "beir-v1.0.0-hotpotqa.splade-v3",
+    "msmarco":  "msmarco-v1-passage.splade-pp-ed",
 }
 
 
@@ -329,9 +334,10 @@ def write_part5_report(
         f.write(f"{'Delta (SPLADE - BM25)':<40} | {sm['nDCG@10']-bm['nDCG@10']:+<9.4f} | {sm['Recall@100']-bm['Recall@100']:+<11.4f} | {sm['MRR@10']-bm['MRR@10']:+<9.4f} | {sm['MAP']-bm['MAP']:+<9.4f}\n")
         f.write("-" * 90 + "\n\n")
 
-        # Three-way expansion term comparison
+        # Three-way expansion term comparison (or two-way if HyDE is skipped)
         has_hyde = any(r["hyde_terms"] for r in comparison_rows)
-        f.write(f"TABLE 2 — THREE-WAY EXPANSION TERM COMPARISON ({len(comparison_rows)} queries)\n")
+        comp_title = "THREE-WAY EXPANSION TERM COMPARISON" if has_hyde else "TWO-WAY EXPANSION TERM COMPARISON (SPLADE vs Rocchio)"
+        f.write(f"TABLE 2 — {comp_title} ({len(comparison_rows)} queries)\n")
         f.write("=" * 100 + "\n\n")
 
         for row in comparison_rows:
@@ -345,10 +351,10 @@ def write_part5_report(
                 hy_str = ", ".join(f"{t}({w:.2f})" for t, w in row["hyde_terms"][:8])
                 f.write(f"  HyDE    : {hy_str}\n")
             f.write(f"  Overlap(SPLADE,Rocchio) = {row['overlap_sp_ro']:.3f}")
-            if row["overlap_sp_hy"] is not None:
+            if has_hyde and row["overlap_sp_hy"] is not None:
                 f.write(f"  Overlap(SPLADE,HyDE) = {row['overlap_sp_hy']:.3f}")
                 f.write(f"  Overlap(Rocchio,HyDE) = {row['overlap_ro_hy']:.3f}")
-            if row["shared_all_three"]:
+            if has_hyde and row["shared_all_three"]:
                 f.write(f"\n  Shared by all three: {', '.join(row['shared_all_three'])}")
             f.write("\n\n")
 
@@ -393,6 +399,7 @@ TUNED_BM25_PARAMS = {
     "scifact":  {"k1": 1.2, "b": 0.75},
     "fever":    {"k1": 1.2, "b": 0.1},
     "hotpotqa": {"k1": 0.9, "b": 0.4},
+    "msmarco":  {"k1": 0.9, "b": 0.4},
 }
 
 
@@ -404,9 +411,20 @@ def evaluate_dataset(dataset_name: str, model_name: str,
     print(f"{'='*60}", flush=True)
 
     # 1. Load queries & qrels
-    test_ds_id = f"beir/{dataset_name}/test"
-    queries, qrels = load_dataset_queries_and_qrels(test_ds_id)
-    print(f"Loaded {len(queries)} test queries.", flush=True)
+    if dataset_name == 'msmarco':
+        print("Loading MSMARCO dev split for evaluation...")
+        all_dev_queries, all_dev_qrels = load_dataset_queries_and_qrels("beir/msmarco/dev")
+        all_qids = sorted(list(all_dev_queries.keys()))
+        tuning_qids = set(RNG.sample(all_qids, min(1000, len(all_qids))))
+        eval_qids = [qid for qid in all_qids if qid not in tuning_qids]
+        
+        queries = {qid: all_dev_queries[qid] for qid in eval_qids}
+        qrels = {qid: all_dev_qrels[qid] for qid in eval_qids if qid in all_dev_qrels}
+        print(f"MSMARCO eval queries (held-out dev): {len(queries)}", flush=True)
+    else:
+        test_ds_id = f"beir/{dataset_name}/test"
+        queries, qrels = load_dataset_queries_and_qrels(test_ds_id)
+        print(f"Loaded {len(queries)} test queries.", flush=True)
 
     # 2. SPLADE retrieval
     splade_run_path = output_dir / f"{dataset_name}_splade_run.json"
@@ -477,32 +495,35 @@ def evaluate_dataset(dataset_name: str, model_name: str,
         fb_docs=5, fb_terms=10,
     )
 
-    # 7. Extract HyDE expansion terms (if cache available)
+    # 7. Extract HyDE expansion terms (if cache available and not skipped)
     hyde_terms: Dict[str, List[Tuple[str, float]]] = {}
-    hyde_cache_patterns = [
-        workspace_dir / "hyde_cache" / f"{dataset_name}_qwen2.5_7b_n5.json",
-        workspace_dir / "hyde_cache" / f"{dataset_name}_hyde.json",
-    ]
-    hyde_cache = None
-    for cp in hyde_cache_patterns:
-        if cp.exists():
-            print(f"Loading HyDE cache from {cp}", flush=True)
-            with open(cp, "r", encoding="utf-8") as f:
-                hyde_cache = json.load(f)
-            break
-
-    if hyde_cache:
-        available = [qid for qid in comparison_qids if qid in hyde_cache]
-        if available:
-            hyde_terms = extract_hyde_terms_for_queries(
-                available, queries, index_dir,
-                k1=bm25_params["k1"], b=bm25_params["b"],
-                hyde_cache=hyde_cache, fb_docs=5, fb_terms=10,
-            )
-            print(f"Extracted HyDE terms for {len(hyde_terms)} queries.", flush=True)
+    if dataset_name == "msmarco":
+        print(f"Skipping HyDE expansion terms for {dataset_name} (HyDE evaluation skipped for MSMARCO).", flush=True)
     else:
-        print(f"[WARN] No HyDE cache found for {dataset_name}. "
-              "Three-way comparison will be SPLADE vs Rocchio only.", flush=True)
+        hyde_cache_patterns = [
+            workspace_dir / "hyde_cache" / f"{dataset_name}_qwen2.5_7b_n5.json",
+            workspace_dir / "hyde_cache" / f"{dataset_name}_hyde.json",
+        ]
+        hyde_cache = None
+        for cp in hyde_cache_patterns:
+            if cp.exists():
+                print(f"Loading HyDE cache from {cp}", flush=True)
+                with open(cp, "r", encoding="utf-8") as f:
+                    hyde_cache = json.load(f)
+                break
+
+        if hyde_cache:
+            available = [qid for qid in comparison_qids if qid in hyde_cache]
+            if available:
+                hyde_terms = extract_hyde_terms_for_queries(
+                    available, queries, index_dir,
+                    k1=bm25_params["k1"], b=bm25_params["b"],
+                    hyde_cache=hyde_cache, fb_docs=5, fb_terms=10,
+                )
+                print(f"Extracted HyDE terms for {len(hyde_terms)} queries.", flush=True)
+        else:
+            print(f"[WARN] No HyDE cache found for {dataset_name}. "
+                  "Comparison will be SPLADE vs Rocchio only.", flush=True)
 
     # 8. Build comparison table
     comparison_rows = build_comparison_table(
@@ -532,7 +553,7 @@ def main():
         description="Part 5: SPLADE Sparse Retrieval with Pretrained Checkpoint"
     )
     parser.add_argument("--datasets", nargs="+", default=["scifact"],
-                        help="Datasets to evaluate (scifact, fever, hotpotqa)")
+                        help="Datasets to evaluate (scifact, fever, hotpotqa, msmarco)")
     parser.add_argument("--model", type=str,
                         default="naver/splade-cocondenser-ensembledistil",
                         help="HuggingFace SPLADE model name")

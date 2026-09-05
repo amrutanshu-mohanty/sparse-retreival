@@ -62,7 +62,7 @@ Query ID: 76562
 Query ID: 60442
   Text: "Tye Sheridan was cut from The Tree of Life."
   SPLADE  : trees(1.11), cutting(0.95), character(0.79), murder(0.77), film(0.69), died(0.66), actor(0.66), she(0.64), carved(0.54), death(0.43)
-  Rocchio : trees(0.24), one(0.06), represented(0.06), paper(0.05), forest(0.05), node(0.04), experimental(0.03), adaptation(0.03)
+  Rocchio : trees(0.24), one(0.06), represented(0.06), paper(0.05), forest(0.05), node(0.04), adaptation(0.03), experimental(0.03)
   HyDE    : malick(0.22), released(0.15), one(0.13), directed(0.13), film(0.11), jack(0.08), role(0.07), integral(0.06)
   Overlap(SPLADE,Rocchio) = 0.034  Overlap(SPLADE,HyDE) = 0.034  Overlap(Rocchio,HyDE) = 0.053
 
@@ -100,7 +100,7 @@ Query ID: 219173
   Text: "Species distribution can be understood through only through speciation."
   SPLADE  : understand(1.42), flora(1.31), distributed(1.18), darwin(0.91), defined(0.72), understanding(0.59), extinction(0.58), by(0.57), science(0.56), evolution(0.50)
   Rocchio : one(0.08), genetic(0.05), evolution(0.05), mayr(0.04), range(0.04), ernst(0.04), extinction(0.04), may(0.03)
-  HyDE    : including(0.16), indeed(0.09), competition(0.07), however(0.07), critical(0.07), fundamental(0.06), determinant(0.06), claim(0.06)
+  HyDE    : including(0.16), indeed(0.09), competition(0.07), critical(0.07), however(0.07), fundamental(0.06), determinant(0.06), claim(0.06)
   Overlap(SPLADE,Rocchio) = 0.071  Overlap(SPLADE,HyDE) = 0.000  Overlap(Rocchio,HyDE) = 0.000
 
 Query ID: 46582

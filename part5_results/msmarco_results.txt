@@ -1,0 +1,139 @@
+====================================================================================================
+        PART 5: SPLADE SPARSE RETRIEVAL — MSMARCO
+====================================================================================================
+
+SPLADE Model : naver/splade-cocondenser-ensembledistil
+Queries      : 5980
+
+TABLE 1 — RETRIEVAL METRICS
+Method                                   | nDCG@10   | Recall@100  | MRR@10    | MAP      
+------------------------------------------------------------------------------------------
+Tuned BM25 Baseline (Part 2)             | 0.2261    | 0.6606      | 0.1817    | 0.1897   
+SPLADE (prebuilt index)                  | 0.4466    | 0.9081      | 0.3804    | 0.3854   
+Delta (SPLADE - BM25)                    | 0.2205+++ | 0.2475+++++ | 0.1987+++ | 0.1957+++
+------------------------------------------------------------------------------------------
+
+TABLE 2 — TWO-WAY EXPANSION TERM COMPARISON (SPLADE vs Rocchio) (15 queries)
+====================================================================================================
+
+Query ID: 652912
+  Text: "what does the sun symbolize"
+  SPLADE  : solar(1.47), sunlight(1.44), represent(1.23), symbols(0.96), astronomy(0.81), symbolism(0.81), god(0.81), sign(0.74), jacob(0.67), mars(0.64)
+  Rocchio : symbols(0.23), lizard(0.19), one(0.15), resurrection(0.14), symbol(0.14), romans(0.13), national(0.13), tattoo(0.12)
+  Overlap(SPLADE,Rocchio) = 0.034
+
+Query ID: 7968
+  Text: "When did the earthquake hit San Francisco during the World Series"
+  SPLADE  : date(2.06), early(1.95), earthquakes(1.88), california(1.13), baseball(0.76), stadium(0.72), was(0.67), event(0.60), bomb(0.58), strike(0.56)
+  Rocchio : caused(0.31), prieta(0.21), bay(0.20), loma(0.18), occurred(0.17), candlestick(0.12), including(0.09), several(0.09)
+  Overlap(SPLADE,Rocchio) = 0.000
+
+Query ID: 129517
+  Text: "define: entity's"
+  SPLADE  : entities(2.64), definition(1.24), ##s(0.93), thomas(0.81), business(0.68), organization(0.67), bart(0.67), madison(0.65), science(0.62), existence(0.62)
+  Rocchio : keys(0.39), key(0.25), one(0.20), refers(0.20), super(0.18), set(0.17), information(0.10), named(0.09)
+  Overlap(SPLADE,Rocchio) = 0.000
+
+Query ID: 1061472
+  Text: "what is aripiprazole used for?"
+  SPLADE  : useful(1.55), drug(1.17), treatment(0.95), use(0.86), addiction(0.52), medication(0.44), help(0.38), pill(0.35), therapy(0.32), inhibitor(0.24)
+  Rocchio : use(0.40), patients(0.23), uses(0.13), schizophrenia(0.12), people(0.12), allergic(0.12), recommended(0.11), may(0.11)
+  Overlap(SPLADE,Rocchio) = 0.050
+
+Query ID: 1091529
+  Text: "polystone uhmw weight"
+  SPLADE  : pound(1.50), stone(1.43), weigh(1.29), size(0.71), ##tone(0.64), material(0.64), blade(0.62), height(0.53), model(0.35), tank(0.25)
+  Rocchio : material(0.22), molecular(0.22), ultra(0.16), high(0.12), including(0.09), simple(0.06), systems(0.06), sheet(0.06)
+  Overlap(SPLADE,Rocchio) = 0.034
+
+Query ID: 153037
+  Text: "distance between cities amarillo tx and mora new mexico"
+  SPLADE  : miles(1.64), texas(1.37), city(1.10), nm(0.96), distances(0.85), laguna(0.68), mexican(0.57), to(0.48), colorado(0.45), california(0.41)
+  Rocchio : childress(0.33), driving(0.25), texas(0.22), bushland(0.18), boys(0.16), paso(0.16), denver(0.15), borger(0.12)
+  Overlap(SPLADE,Rocchio) = 0.034
+
+Query ID: 1095942
+  Text: "how much ibuprofen can you take in a day"
+  SPLADE  : daily(2.00), dose(1.56), total(1.07), max(1.05), drug(0.88), amount(0.78), pill(0.52), weight(0.51), many(0.49), dos(0.46)
+  Rocchio : hours(0.23), one(0.23), advil(0.18), tylenol(0.16), advll(0.13), dose(0.06), will(0.06), maximum(0.06)
+  Overlap(SPLADE,Rocchio) = 0.071
+
+Query ID: 29416
+  Text: "att email toll free number"
+  SPLADE  : phone(1.65), call(1.28), mail(1.24), contact(0.87), telephone(0.69), wireless(0.16), customer(0.13), service(0.04), office(0.02)
+  Rocchio : juno(0.21), hotspot(0.15), provides(0.15), states(0.14), address(0.12), phone(0.09), broadband(0.09), may(0.09)
+  Overlap(SPLADE,Rocchio) = 0.056
+
+Query ID: 1089541
+  Text: "to what extent is exclusion ethical according to the nasw code of ethics?"
+  SPLADE  : exclude(1.68), degree(0.60), penalty(0.47), fraud(0.46), respect(0.43), legal(0.43), protection(0.41), law(0.26), judge(0.25), policy(0.25)
+  Rocchio : delegate(0.26), values(0.19), social(0.18), association(0.15), national(0.12), professional(0.12), dilemma(0.10), use(0.08)
+  Overlap(SPLADE,Rocchio) = 0.000
+
+Query ID: 165002
+  Text: "does contraction of the ciliary muscles shorten the lens"
+  SPLADE  : lenses(1.57), muscle(1.19), contract(1.13), eye(0.95), shorter(0.69), increase(0.66), pupil(0.61), movement(0.61), mechanism(0.58), effect(0.54)
+  Rocchio : body(0.31), focal(0.14), thickness(0.13), meaning(0.09), thicker(0.09), ligaments(0.08), change(0.08), composed(0.08)
+  Overlap(SPLADE,Rocchio) = 0.000
+
+Query ID: 1006791
+  Text: "when did hhs secretary price resign"
+  SPLADE  : date(2.22), early(1.97), prices(1.84), resigned(1.53), resignation(1.39), president(0.88), 2019(0.77), ##h(0.74), director(0.69), hs(0.63)
+  Rocchio : resigned(0.35), hargan(0.27), president(0.20), tom(0.17), trump(0.14), amid(0.11), eric(0.11), replace(0.09)
+  Overlap(SPLADE,Rocchio) = 0.071
+
+Query ID: 99183
+  Text: "convert wh to joules"
+  SPLADE  : ##ule(1.96), calculate(1.27), math(0.95), equation(0.47), conversion(0.33), reaction(0.30), mill(0.21), reading(0.19), max(0.17), tate(0.14)
+  Rocchio : energy(0.54), watt(0.52), hours(0.31), one(0.29), multiply(0.27), electrical(0.22), used(0.22), hour(0.18)
+  Overlap(SPLADE,Rocchio) = 0.038
+
+Query ID: 671219
+  Text: "what injection do they give for withdrawal"
+  SPLADE  : withdraw(2.04), drug(1.29), injected(1.25), shot(1.00), pill(0.94), given(0.91), medication(0.89), treatment(0.89), vaccine(0.80), drugs(0.69)
+  Rocchio : seconds(0.29), sql(0.16), vial(0.12), use(0.12), inject(0.12), serostim(0.11), administer(0.10), minutes(0.09)
+  Overlap(SPLADE,Rocchio) = 0.034
+
+Query ID: 1082351
+  Text: "what dog breed is a peekapoo"
+  SPLADE  : dogs(1.49), breeds(1.29), species(1.01), animal(0.53), character(0.41), terri(0.40), variety(0.39), pet(0.34), hint(0.30), horse(0.29)
+  Rocchio : easy(0.22), years(0.13), dogs(0.13), friendly(0.13), ukc(0.10), intelligent(0.10), states(0.10), family(0.09)
+  Overlap(SPLADE,Rocchio) = 0.034
+
+Query ID: 1102400
+  Text: "why do bears hibernate"
+  SPLADE  : bear(2.42), because(1.71), behavior(1.06), they(0.74), cause(0.65), their(0.60), mechanism(0.60), adaptation(0.56), hunting(0.48), sleep(0.46)
+  Rocchio : winter(0.22), animals(0.16), torpor(0.14), bbcearthsub(0.12), discover(0.07), slumber(0.07), bats(0.07), always(0.06)
+  Overlap(SPLADE,Rocchio) = 0.000
+
+AGGREGATE OVERLAP STATISTICS
+------------------------------------------------------------
+  Mean Jaccard(SPLADE, Rocchio) = 0.0306
+
+DISAGREEMENT CASE STUDIES
+====================================================================================================
+
+Case 1: Query "When did the earthquake hit San Francisco during the World Series" (ID: 7968)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : baseball, bomb, california, date, early, earthquakes, event, stadium
+  Rocchio-only terms: bay, candlestick, caused, general, including, loma, occurred, prieta
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
+Case 2: Query "define: entity's" (ID: 129517)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : ##s, bart, business, definition, entities, existence, madison, organization
+  Rocchio-only terms: body, information, key, keys, named, one, refers, set
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
+Case 3: Query "to what extent is exclusion ethical according to the nasw code of ethics?" (ID: 1089541)
+  Jaccard(SPLADE, Rocchio) = 0.000
+  SPLADE-only terms : degree, exclude, fraud, judge, law, legal, penalty, policy
+  Rocchio-only terms: association, create, delegate, dilemma, national, professional, social, use
+  Discussion: SPLADE learns contextual expansion via MLM pretraining,
+  producing semantically related terms. Rocchio relies on term frequency
+  in top-retrieved documents, biased toward co-occurring corpus vocabulary.
+
