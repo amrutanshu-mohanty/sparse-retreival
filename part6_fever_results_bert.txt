@@ -1,0 +1,74 @@
+Part 6: Custom Trained SPLADE Evaluation — FEVER
+==================================================
+
+TABLE 1 — RETRIEVAL METRICS
+Method                                   | nDCG@10   | Recall@100  | MRR@10    | MAP      
+------------------------------------------------------------------------------------------
+Custom Fine-tuned SPLADE (FEVER)         | 0.1118    | 0.1400      | 0.1110    | 0.1048   
+------------------------------------------------------------------------------------------
+
+================================================================================
+   EXPANSION TERM COMPARISON: PRETRAINED VS FINE-TUNED SPLADE (FEVER)
+================================================================================
+
+Query ID: 163803
+  Claim Text : "Ukrainian Soviet Socialist Republic was a founding participant of the UN."
+  Pretrained : ukraine(1.99), nations(1.18), founded(1.16), russia(1.01), socialism(0.99), communism(0.89), participation(0.86), yugoslavia(0.75), participants(0.73), russian(0.73)
+  Fine-tuned : ukraine(2.18), country(1.25), kiev(1.21), member(1.21), russian(1.16), plan(1.15), russia(1.01), federation(0.85), ussr(0.84), polish(0.76)
+  Jaccard Overlap: 0.176
+
+Query ID: 70041
+  Claim Text : "2 Hearts is a musical composition by Minogue."
+  Pretrained : heart(2.18), kylie(1.65), two(1.64), artist(1.18), song(1.15), composed(0.94), music(0.89), vanessa(0.84), soundtrack(0.79), singer(0.76)
+  Fine-tuned : heart(1.86), kylie(1.59), love(1.47), song(1.23), video(1.12), two(1.02), music(0.96), maxi(0.89), 2nd(0.84), honey(0.81)
+  Jaccard Overlap: 0.333
+
+Query ID: 202314
+  Claim Text : "The New Jersey Turnpike has zero shoulders."
+  Pretrained : shoulder(1.82), nj(1.72), have(1.01), interstate(0.87), seven(0.75), ny(0.72), road(0.71), no(0.69), route(0.67), lane(0.64)
+  Fine-tuned : bridge(1.54), bus(1.32), road(1.31), no(1.18), highway(0.76), pennsylvania(0.21), penn(0.13), car(0.07), us(0.03), way(0.00)
+  Jaccard Overlap: 0.111
+
+Query ID: 6032
+  Claim Text : "Aruba is the only ABC Island."
+  Pretrained : islands(1.38), bbc(0.99), geography(0.77), beach(0.76), country(0.58), biggest(0.53), bahamas(0.51), location(0.49), carmen(0.42), simon(0.41)
+  Fine-tuned : africa(1.12), ocean(1.03), ara(0.97), congo(0.91), australia(0.64), cape(0.56), caribbean(0.53), cuba(0.41), op(0.34), country(0.28)
+  Jaccard Overlap: 0.053
+
+Query ID: 130048
+  Claim Text : "Burbank, California has always been completely void of industry."
+  Pretrained : industries(1.39), ca(1.27), city(0.87), blank(0.86), industrial(0.83), ##polis(0.69), never(0.61), without(0.56), location(0.55), town(0.53)
+  Fine-tuned : cal(1.35), art(0.96), los(0.85), gold(0.80), film(0.73), desert(0.61), city(0.57), industrial(0.56), summer(0.54), ranch(0.54)
+  Jaccard Overlap: 0.111
+
+Query ID: 204575
+  Claim Text : "Commodore is ranked above a rear admiral."
+  Pretrained : rank(1.39), below(1.15), captain(1.06), naval(1.01), rating(0.74), highest(0.73), position(0.72), than(0.68), ship(0.63), commander(0.63)
+  Fine-tuned : captain(1.86), navy(1.67), rank(1.67), sailor(1.42), gunner(1.36), class(1.31), ship(1.21), deck(1.14), sea(1.10), officer(1.09)
+  Jaccard Overlap: 0.176
+
+Query ID: 164883
+  Claim Text : "Hezbollah received a type of training from Iran."
+  Pretrained : iranian(1.63), train(1.41), lebanese(1.35), receive(0.85), israel(0.83), nationality(0.68), trainer(0.65), islam(0.62), army(0.61), camp(0.60)
+  Fine-tuned : lebanon(1.98), lebanese(1.35), israel(1.23), ali(1.00), pakistan(1.00), beirut(0.98), shell(0.78), jordan(0.67), sharon(0.59), plane(0.57)
+  Jaccard Overlap: 0.111
+
+Query ID: 54298
+  Claim Text : "In states still employing the electric chair to execute people, the prisoner is allowed the choice of lethal injection as an alternative method."
+  Pretrained : chairs(1.54), prison(1.26), execution(1.12), electrical(1.02), executed(0.96), torture(0.96), injected(0.92), state(0.86), allow(0.83), methods(0.79)
+  Fine-tuned : execution(1.52), prison(1.45), death(1.17), country(1.08), state(1.06), usa(0.85), prisoners(0.81), person(0.69), us(0.65), pain(0.26)
+  Jaccard Overlap: 0.176
+
+Query ID: 219675
+  Claim Text : "Corsica belongs to Italy."
+  Pretrained : italian(1.85), belong(1.69), comte(1.64), nationality(1.02), france(0.83), location(0.77), belonging(0.76), geography(0.74), this(0.73), island(0.68)
+  Fine-tuned : island(1.62), france(1.49), europe(1.40), country(1.26), malta(1.25), switzerland(1.22), base(1.17), aria(1.17), georgia(1.16), sardinia(1.07)
+  Jaccard Overlap: 0.111
+
+Query ID: 134850
+  Claim Text : "Ice-T refused to ever make hip-hop music."
+  Pretrained : icy(1.04), failed(0.95), song(0.90), refusal(0.86), not(0.84), artist(0.82), won(0.75), never(0.74), rapper(0.67), controversial(0.66)
+  Fine-tuned : rap(0.99), cold(0.68), the(0.61), hit(0.48), trip(0.44), house(0.26), dance(0.20), cool(0.17), mc(0.11), hard(0.09)
+  Jaccard Overlap: 0.000
+
+Mean Jaccard Overlap across 10 queries: 0.1360
