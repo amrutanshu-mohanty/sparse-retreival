@@ -122,10 +122,12 @@ This script will:
 
 ## Running HyDE (LLM-Generated Feedback) Analysis (Part 4b)
 
-Part 4b replaces corpus-retrieved feedback with LLM-generated hypothetical documents (HyDE) while reusing the Part 4a Rocchio implementation unchanged. 
+Part 4b replaces corpus-retrieved feedback with LLM-generated hypothetical documents (HyDE) while reusing the Part 4a Rocchio implementation unchanged.
+
+The script `part4b_hyde.py` handles the entire pipeline automatically. If a cache file exists, it will load the generated documents instantly. If not, it will prompt Ollama to generate and cache them in `hyde_cache/`.
 
 ### 1. Ollama Setup (Local LLM)
-This step uses a local LLM to avoid paid APIs. You must have Ollama installed and the required model downloaded before running the script.
+This step uses a local LLM to avoid paid APIs. You must have Ollama installed and the required model downloaded before running the script if `hyde_cache/` is empty.
 1. Download and install [Ollama](https://ollama.com/).
 2. Open your terminal and pull the required Qwen2.5 7B model:
    ```bash
@@ -139,6 +141,7 @@ This step uses a local LLM to avoid paid APIs. You must have Ollama installed an
        python part4b_hyde.py --datasets fever hotpotqa --ollama-model qwen2.5:7b --hyde-n 5
        ```
 
+Results are saved in `part4b_results/{dataset}_results.txt`.
 ## Running SPLADE Sparse Retrieval (Part 5)
 
 Part 5 uses a pretrained SPLADE checkpoint to encode queries and retrieve from prebuilt SPLADE impact indexes. It also compares expansion terms against Rocchio (Part 4a) and HyDE (Part 4b).

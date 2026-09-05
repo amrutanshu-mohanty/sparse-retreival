@@ -1,0 +1,66 @@
+========================================================================================================
+        PART 4b: HyDE (LLM-GENERATED FEEDBACK) -- DATASET REPORT
+========================================================================================================
+
+--------------------------------------------------------------------------------------------------------
+DATASET: FEVER (6666 Test Queries)
+--------------------------------------------------------------------------------------------------------
+
+EXPERIMENTAL SETUP:
+ - Query set        : full test split (6666 queries)
+ - First-stage BM25 : tuned k1=1.2, b=0.1 (Part 2 values)
+ - HyDE generator   : qwen2.5:7b via Ollama, 5 samples/query (temp=0.7)
+ - Prompt template  : Please write an encyclopedia passage to support or refute the claim.
+ - Prompt-echo removal: leading-label strip 13531/33330 generations (40.6%); statistical (>= 15% of generations): claim (80.1%)
+
+TABLE 1 -- RETRIEVAL EFFECTIVENESS
+Method / Configuration                             | nDCG@10   | Recall@100  | MRR@10    | MAP      
+--------------------------------------------------------------------------------------------------------
+Baseline Tuned BM25 (No PRF)                       | 0.6843    | 0.9275      | 0.6596    | 0.6316   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=3, k=3)                   | 0.6661    | 0.9199      | 0.6398    | 0.6102   
+(B) Rocchio-weighted HyDE (N=3, k=3)               | 0.6542    | 0.9151      | 0.6274    | 0.6011   
+(C) 4a Corpus Rocchio PRF (N=3, k=3)               | 0.5428    | 0.8868      | 0.4867    | 0.4678   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=3, k=5)                   | 0.6661    | 0.9199      | 0.6398    | 0.6102   
+(B) Rocchio-weighted HyDE (N=3, k=5)               | 0.6252    | 0.9077      | 0.5957    | 0.5710   
+(C) 4a Corpus Rocchio PRF (N=3, k=5)               | 0.5250    | 0.8642      | 0.4644    | 0.4467   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=5, k=3)                   | 0.6689    | 0.9228      | 0.6430    | 0.6129   
+(B) Rocchio-weighted HyDE (N=5, k=3)               | 0.6629    | 0.9156      | 0.6367    | 0.6094   
+(C) 4a Corpus Rocchio PRF (N=5, k=3)               | 0.5237    | 0.8849      | 0.4650    | 0.4471   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=5, k=5)                   | 0.6689    | 0.9228      | 0.6430    | 0.6129   
+(B) Rocchio-weighted HyDE (N=5, k=5)               | 0.6383    | 0.9087      | 0.6116    | 0.5838   
+(C) 4a Corpus Rocchio PRF (N=5, k=5)               | 0.4951    | 0.8648      | 0.4321    | 0.4147   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=5, k=10)                  | 0.6689    | 0.9228      | 0.6430    | 0.6129   
+(B) Rocchio-weighted HyDE (N=5, k=10)              | 0.5426    | 0.8812      | 0.5046    | 0.4836   
+(C) 4a Corpus Rocchio PRF (N=5, k=10)              | 0.4562    | 0.8474      | 0.3877    | 0.3724   
+--------------------------------------------------------------------------------------------------------
+Note: arm (A) performs no term selection, so it is invariant to k; rows at equal N are
+identical by construction. alpha=1.0, beta=0.75 throughout (Jedidi & Lin defaults).
+
+TABLE 2 -- SOURCE EFFECT vs COMBINATION EFFECT (the 4b question)
+  Source effect      = (B) - (C): swaps LLM feedback for corpus feedback, method fixed = Rocchio
+  Combination effect = (B) - (A): swaps Rocchio weighting for concatenation, source fixed = HyDE
+
+Setting                | Effect               | nDCG@10   | Recall@100  | MRR@10    | MAP      
+--------------------------------------------------------------------------------------------------------
+N=3, k=3               | Source (B-C)         | +0.1114   | +0.0282     | +0.1407   | +0.1333  
+N=3, k=3               | Combination (B-A)    | -0.0120   | -0.0049     | -0.0124   | -0.0091  
+N=3, k=5               | Source (B-C)         | +0.1002   | +0.0436     | +0.1313   | +0.1243  
+N=3, k=5               | Combination (B-A)    | -0.0410   | -0.0122     | -0.0441   | -0.0392  
+N=5, k=3               | Source (B-C)         | +0.1392   | +0.0307     | +0.1717   | +0.1623  
+N=5, k=3               | Combination (B-A)    | -0.0060   | -0.0072     | -0.0063   | -0.0035  
+N=5, k=5               | Source (B-C)         | +0.1431   | +0.0439     | +0.1795   | +0.1692  
+N=5, k=5               | Combination (B-A)    | -0.0306   | -0.0141     | -0.0314   | -0.0291  
+N=5, k=10              | Source (B-C)         | +0.0863   | +0.0338     | +0.1169   | +0.1112  
+N=5, k=10              | Combination (B-A)    | -0.1263   | -0.0416     | -0.1384   | -0.1294  
+--------------------------------------------------------------------------------------------------------
+
+SUMMARY METRICS (standard setting N=5, k=10; full drift/recovery/overlap detail across all settings is in 4b_report.txt):
+ - Drift vs BM25 (win/loss %)      : (A) win=26% loss=29% / (B) win=18% loss=43% / (C) win=9% loss=58%
+ - Top-10 failure recovery rate    : (A) 56% / (B) 37% / (C) 9%
+ - HyDE vs Corpus term overlap (Jaccard): 0.1214
+

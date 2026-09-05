@@ -1,5 +1,5 @@
 ========================================================================================================
-        PART 4b: HyDE (LLM-GENERATED FEEDBACK) -- FEEDBACK SOURCE vs COMBINATION METHOD
+        PART 4b: HyDE (LLM-GENERATED FEEDBACK) -- DATASET REPORT
 ========================================================================================================
 
 --------------------------------------------------------------------------------------------------------
@@ -7,68 +7,36 @@ DATASET: SCIFACT (300 Test Queries)
 --------------------------------------------------------------------------------------------------------
 
 EXPERIMENTAL SETUP:
- - Query set          : full test split (300 queries)
- - First-stage BM25   : tuned k1=1.2, b=0.75 (Part 2 values)
- - HyDE generator     : qwen2.5:7b served locally via Ollama, 5 samples/query (temperature=0.7)
- - HyDE cache         : /Users/vamshi/Downloads/sparse-retreival/hyde_cache/scifact_qwen2.5_7b_n5.json
- - Feedback model     : Part 4a's RocchioQueryExpander, inherited unchanged; only
-                        get_doc_tokens() is overridden to return LLM text.
- - Prompt template    : per-corpus, following Gao et al.'s task-specific HyDE prompts:
-                        | Please write a scientific paper passage to support or refute the claim.
-                        | Claim: {query}
-                        | Passage:
-
-PROMPT-ECHO ARTIFACT REMOVAL:
- Instruct-tuned models copy the prompt's instruction wording back into their output.
- Those tokens are NOT corpus vocabulary, but they DO stem to real postings
- (summary->summari, df=117; entities->entiti, df=14), so leaving them in injects
- spurious matches -- most damagingly into arm (A), which applies no idf filtering at
- all. Two complementary mechanisms remove them:
-
- (i)  STRUCTURAL -- an echoed leading label ("Summary:", "Passage:", ...) is stripped.
-      Applied to 1277 / 1500 generations (85.1%). This alone drops the
-      document frequency of "summary" from 86.0% to 3.3% of generations.
-
- (ii) STATISTICAL -- a token is removed iff it occurs in the prompt template AND in
-      >= 15% of all generations (measured after (i)). Only prompt vocabulary is
-      eligible, so a genuine corpus term can never be removed by this rule. Detected:
-        - "key" : present in 49.2% of generations
-        - "entities" : present in 28.1% of generations
-        - "precise" : present in 18.0% of generations
-
- Both mechanisms are applied identically to arms (A) and (B), so the naive-concat vs
- Rocchio comparison stays like-for-like. Arm (C) uses real corpus documents and is
- unaffected.
-
- NOT REMOVED -- ADJUDICATION LEAK. A separate, narrower problem is left in place
- because it is a property of the generations rather than of the prompt's wording:
- 21 / 1500 generations (1.4%) contain an explicit verdict phrase ("this statement
- is incorrect", "the claim is ...") because the model adjudicated the SciFact claim
- instead of writing a passage in the corpus's register. Corpus-wide this is rare
- ("incorrect" 2.1%, "statement" 4.1% of generations), which is exactly why it is
- damaging: rare words carry high idf, so on the individual queries where the model
- does adjudicate, the verdict vocabulary outranks genuine domain terms and dominates
- that query's expansion. The drift case studies below label each case by which of the
- two mechanisms caused it. The fix is a prompt change (Gao et al.'s SciFact template
- asks for a passage that supports or refutes, which does not invite a verdict), not a
- token filter -- a filter here would delete genuine corpus words such as "support".
+ - Query set        : full test split (300 queries)
+ - First-stage BM25 : tuned k1=1.2, b=0.75 (Part 2 values)
+ - HyDE generator   : qwen2.5:7b via Ollama, 5 samples/query (temp=0.7)
+ - Prompt template  : Please write a scientific paper passage to support or refute the claim.
+ - Prompt-echo removal: leading-label strip 1277/1500 generations (85.1%); statistical (>= 15% of generations): key (49.2%), entities (28.1%), precise (18.0%)
 
 TABLE 1 -- RETRIEVAL EFFECTIVENESS
 Method / Configuration                             | nDCG@10   | Recall@100  | MRR@10    | MAP      
 --------------------------------------------------------------------------------------------------------
 Baseline Tuned BM25 (No PRF)                       | 0.6826    | 0.9282      | 0.6464    | 0.6396   
 --------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=3, k=3)                   | 0.6667    | 0.9516      | 0.6209    | 0.6148   
+(B) Rocchio-weighted HyDE (N=3, k=3)               | 0.6872    | 0.9337      | 0.6425    | 0.6344   
+(C) 4a Corpus Rocchio PRF (N=3, k=3)               | 0.5959    | 0.9070      | 0.5371    | 0.5323   
+--------------------------------------------------------------------------------------------------------
 (A) Naive Concat HyDE (N=3, k=5)                   | 0.6667    | 0.9516      | 0.6209    | 0.6148   
 (B) Rocchio-weighted HyDE (N=3, k=5)               | 0.6655    | 0.9307      | 0.6181    | 0.6142   
-(C) 4a Corpus Rocchio PRF (N=3, k=5)               | 0.5904    | 0.9030      | 0.5280    | 0.5225   
+(C) 4a Corpus Rocchio PRF (N=3, k=5)               | 0.5899    | 0.9030      | 0.5275    | 0.5219   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=5, k=3)                   | 0.6711    | 0.9499      | 0.6266    | 0.6190   
+(B) Rocchio-weighted HyDE (N=5, k=3)               | 0.6766    | 0.9453      | 0.6300    | 0.6230   
+(C) 4a Corpus Rocchio PRF (N=5, k=3)               | 0.5659    | 0.9152      | 0.4978    | 0.4959   
+--------------------------------------------------------------------------------------------------------
+(A) Naive Concat HyDE (N=5, k=5)                   | 0.6711    | 0.9499      | 0.6266    | 0.6190   
+(B) Rocchio-weighted HyDE (N=5, k=5)               | 0.6701    | 0.9380      | 0.6214    | 0.6181   
+(C) 4a Corpus Rocchio PRF (N=5, k=5)               | 0.5504    | 0.9140      | 0.4787    | 0.4768   
 --------------------------------------------------------------------------------------------------------
 (A) Naive Concat HyDE (N=5, k=10)                  | 0.6711    | 0.9499      | 0.6266    | 0.6190   
 (B) Rocchio-weighted HyDE (N=5, k=10)              | 0.6281    | 0.9430      | 0.5836    | 0.5807   
 (C) 4a Corpus Rocchio PRF (N=5, k=10)              | 0.5155    | 0.8773      | 0.4420    | 0.4380   
---------------------------------------------------------------------------------------------------------
-(A) Naive Concat HyDE (N=5, k=20)                  | 0.6711    | 0.9499      | 0.6266    | 0.6190   
-(B) Rocchio-weighted HyDE (N=5, k=20)              | 0.4748    | 0.9342      | 0.4124    | 0.4174   
-(C) 4a Corpus Rocchio PRF (N=5, k=20)              | 0.4898    | 0.8739      | 0.4148    | 0.4139   
 --------------------------------------------------------------------------------------------------------
 Note: arm (A) performs no term selection, so it is invariant to k; rows at equal N are
 identical by construction. alpha=1.0, beta=0.75 throughout (Jedidi & Lin defaults).
@@ -79,360 +47,14 @@ TABLE 2 -- SOURCE EFFECT vs COMBINATION EFFECT (the 4b question)
 
 Setting                | Effect               | nDCG@10   | Recall@100  | MRR@10    | MAP      
 --------------------------------------------------------------------------------------------------------
-N=3, k=5               | Source (B-C)         | +0.0752   | +0.0277     | +0.0901   | +0.0918  
+N=3, k=3               | Source (B-C)         | +0.0913   | +0.0267     | +0.1054   | +0.1022  
+N=3, k=3               | Combination (B-A)    | +0.0204   | -0.0179     | +0.0216   | +0.0197  
+N=3, k=5               | Source (B-C)         | +0.0756   | +0.0277     | +0.0906   | +0.0923  
 N=3, k=5               | Combination (B-A)    | -0.0012   | -0.0209     | -0.0028   | -0.0005  
+N=5, k=3               | Source (B-C)         | +0.1107   | +0.0301     | +0.1321   | +0.1272  
+N=5, k=3               | Combination (B-A)    | +0.0056   | -0.0046     | +0.0034   | +0.0040  
+N=5, k=5               | Source (B-C)         | +0.1198   | +0.0240     | +0.1427   | +0.1412  
+N=5, k=5               | Combination (B-A)    | -0.0009   | -0.0119     | -0.0052   | -0.0010  
 N=5, k=10              | Source (B-C)         | +0.1126   | +0.0657     | +0.1416   | +0.1426  
 N=5, k=10              | Combination (B-A)    | -0.0429   | -0.0069     | -0.0430   | -0.0384  
-N=5, k=20              | Source (B-C)         | -0.0149   | +0.0603     | -0.0024   | +0.0035  
-N=5, k=20              | Combination (B-A)    | -0.1962   | -0.0157     | -0.2142   | -0.2016  
 --------------------------------------------------------------------------------------------------------
-
-TABLE 3 -- QUANTITATIVE QUERY DRIFT SUMMARY (Delta nDCG@10 vs. Baseline BM25):
-Configuration                                      | Win % (>+0.01)  | Tie %    | Loss % (<-0.01)  | Severe Drift (<-0.20) 
-----------------------------------------------------------------------------------------------------------------------------
-(A) Naive Concat HyDE (N=3, k=5)                   | 19.7          % | 56.7   % | 23.7           % | 16.7                 %
-(B) Rocchio-weighted HyDE (N=3, k=5)               | 14.3          % | 63.0   % | 22.7           % | 15.0                 %
-(C) 4a Corpus Rocchio PRF (N=3, k=5)               | 12.3          % | 52.3   % | 35.3           % | 28.3                 %
-(A) Naive Concat HyDE (N=5, k=10)                  | 20.3          % | 56.7   % | 23.0           % | 16.7                 %
-(B) Rocchio-weighted HyDE (N=5, k=10)              | 13.7          % | 59.7   % | 26.7           % | 21.3                 %
-(C) 4a Corpus Rocchio PRF (N=5, k=10)              | 8.7           % | 42.7   % | 48.7           % | 39.3                 %
-(A) Naive Concat HyDE (N=5, k=20)                  | 20.3          % | 56.7   % | 23.0           % | 16.7                 %
-(B) Rocchio-weighted HyDE (N=5, k=20)              | 8.3           % | 42.7   % | 49.0           % | 44.0                 %
-(C) 4a Corpus Rocchio PRF (N=5, k=20)              | 7.0           % | 42.3   % | 50.7           % | 44.3                 %
-----------------------------------------------------------------------------------------------------------------------------
-
-PART 3 VOCABULARY MISMATCH FAILURE RECOVERY ANALYSIS (standard setting N=5, k=10):
- - Baseline Failed Queries (No relevant doc in Top-10): 49
-   -> Recovered into Top-10 by (A) Naive Concat HyDE       :   18 (36.73%)
-   -> Recovered into Top-10 by (B) Rocchio-weighted HyDE   :   11 (22.45%)
-   -> Recovered into Top-10 by (C) 4a Corpus Rocchio PRF   :    3 (6.12%)
- - Baseline Failed Queries (No relevant doc in Top-20): 34
-   -> Recovered into Top-20 by (A) Naive Concat HyDE       :   16 (47.06%)
-   -> Recovered into Top-20 by (B) Rocchio-weighted HyDE   :   10 (29.41%)
-   -> Recovered into Top-20 by (C) 4a Corpus Rocchio PRF   :    4 (11.76%)
-
- - Recovered Query IDs (Top-10), (A) Naive Concat HyDE:
-   ['783', '1088', '452', '1280', '1200', '508', '303', '1281', '887', '913', '800', '1226', '1368', '821', '1221', '132', '1049', '831']
- - Recovered Query IDs (Top-10), (B) Rocchio-weighted HyDE:
-   ['783', '431', '1280', '1200', '303', '1281', '913', '132', '914', '715', '831']
- - Recovered Query IDs (Top-10), (C) 4a Corpus Rocchio PRF:
-   ['1175', '303', '887']
-
-HyDE vs CORPUS EXPANSION-TERM OVERLAP (input to the Part 5 three-way comparison):
-Setting                | Mean Jaccard(HyDE, Corpus)   | Mean # shared terms 
---------------------------------------------------------------------------------
-N=3, k=5               | 0.0701                       | 0.59                
-N=5, k=10              | 0.0731                       | 1.29                
-N=5, k=20              | 0.0739                       | 2.66                
---------------------------------------------------------------------------------
-
-COMPLETE QUERY ID CLASSIFICATION LISTS (Under Rocchio-weighted HyDE, N=5, k=10):
- - Improved Query IDs (41 queries):
-   ['756', '179', '783', '431', '544', '1196', '619', '1041', '830', '1274', '1280', '1200', '1272', '133', '1379', '303', '1281', '1245', '971', '628', '913', '212', '514', '967', '1197', '72', '1099', '75', '213', '232', '587', '385', '1303', '275', '54', '1121', '132', '914', '1019', '715', '831']
-
- - Hurt / Drifted Query IDs (80 queries):
-   ['324', '1370', '1382', '48', '268', '100', '1320', '115', '198', '859', '327', '1385', '1259', '540', '415', '362', '1137', '314', '960', '729', '956', '300', '1335', '5', '1279', '185', '1029', '569', '957', '343', '148', '183', '99', '1363', '141', '312', '793', '36', '507', '575', '692', '577', '554', '551', '1140', '644', '274', '70', '1225', '513', '1359', '768', '1344', '269', '1021', '649', '873', '50', '388', '674', '1107', '880', '597', '261', '517', '501', '1180', '163', '128', '527', '1362', '784', '1319', '852', '845', '693', '598', '1278', '478', '1020']
-
- - Severe Drift Query IDs (64 queries):
-   ['324', '1370', '1382', '48', '100', '1320', '115', '198', '859', '327', '1385', '1259', '540', '362', '1137', '960', '729', '956', '300', '1335', '5', '1279', '569', '957', '148', '183', '99', '1363', '793', '36', '507', '575', '692', '554', '1140', '644', '274', '70', '1225', '513', '1359', '768', '269', '649', '873', '50', '388', '674', '1107', '880', '597', '501', '1180', '163', '128', '527', '1362', '1319', '852', '845', '693', '598', '1278', '478']
-
- - Unaffected Query IDs (179 queries):
-   ['57', '743', '233', '1316', '1298', '922', '975', '1339', '702', '1175', '759', '1332', '421', '399', '744', '1271', '236', '775', '1088', '820', '716', '879', '94', '811', '1290', '49', '985', '982', '539', '1024', '452', '502', '354', '1086', '230', '837', '993', '411', '1337', '636', '1202', '218', '1185', '294', '137', '690', '921', '1194', '1292', '124', '127', '508', '742', '208', '832', '1204', '384', '728', '882', '589', '1262', '1389', '216', '613', '439', '1', '785', '814', '847', '887', '1012', '1179', '1199', '440', '525', '1104', '146', '1144', '1187', '800', '475', '637', '623', '823', '1146', '535', '660', '781', '410', '903', '1232', '298', '1216', '1132', '386', '1273', '1270', '1226', '42', '1213', '143', '1062', '834', '727', '436', '1089', '279', '1130', '641', '249', '552', '142', '1282', '911', '659', '130', '684', '578', '808', '700', '51', '1241', '219', '1100', '3', '129', '1150', '549', '1368', '380', '13', '56', '821', '536', '171', '113', '1110', '238', '217', '805', '295', '1207', '1336', '1395', '723', '1163', '239', '350', '1191', '1352', '1221', '870', '936', '533', '718', '53', '491', '516', '118', '528', '839', '904', '721', '338', '691', '248', '532', '770', '1049', '907', '1014', '593', '1266', '437', '521', '180', '560', '237', '443']
-
-TOP 10 QUALITATIVE QUERY DRIFT CASE STUDIES (Queries most severely harmed by HyDE expansion):
- Case 1: Query ID: 960
-  * Query Text: "Polymeal nutrition reduces cardiovascular mortality."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.0000 (Delta: -1.0000)
-  * HyDE Expansion Terms  : whole(0.04), health(0.04), food(0.04), plant(0.04), diet(0.04), stroke(0.02), lean(0.02), pattern(0.02)
-  * Corpus Expansion Terms: stress(0.02), blood(0.02), men(0.02), tastier(0.02), ckd(0.02), renal(0.02), risk(0.02), meta(0.02)
-  * Target Document Rank Shifts: Doc 8780599: Rank 1 -> 14
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 2: Query ID: 1363
-  * Query Text: "Venules have a thinner or absent smooth layer compared to arterioles."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.0000 (Delta: -1.0000)
-  * HyDE Expansion Terms  : blood(0.12), flow(0.09), crucial(0.04), media(0.04), thin(0.03), return(0.02), possess(0.02), exhibit(0.02)
-  * Corpus Expansion Terms: sgc(0.06), lcx(0.04), filter(0.04), microm(0.04), odq(0.03), spatial(0.03), lad(0.03), epithelium(0.03)
-  * Target Document Rank Shifts: Doc 8290953: Rank 1 -> 14
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 3: Query ID: 793
-  * Query Text: "Mitochondria are uninvolved in apoptosis."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.0000 (Delta: -1.0000)
-  * HyDE Expansion Terms  : incorrect(0.08), statement(0.07), death(0.06), outer(0.05), pro(0.03), form(0.03), process(0.03), crucial(0.02)
-  * Corpus Expansion Terms: trophoblast(0.04), quercetin(0.04), lung(0.03), fission(0.03), atp(0.03), death(0.03), cytosol(0.02), development(0.02)
-  * Target Document Rank Shifts: Doc 8551160: Rank 1 -> 58
-  * Drift Analysis: ADJUDICATION LEAK -- the LLM argued with the claim rather than writing a
-    corpus-style passage, and the verdict vocabulary (incorrect, statement) was
-    selected as expansion terms. Such words are rare in a scientific corpus, so
-    their idf is high and they outrank genuine domain terms within this query's
-    feedback set. This is a prompt-design failure, not a feedback-model failure.
-
- Case 4: Query ID: 674
-  * Query Text: "LDL cholesterol has no involvement in the development of cardiovascular disease."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.0000 (Delta: -1.0000)
-  * HyDE Expansion Terms  : cvd(0.15), incorrect(0.08), statement(0.06), lipoprotein(0.05), stroke(0.05), risk(0.04), flow(0.03), blood(0.03)
-  * Corpus Expansion Terms: hdl(0.07), ldlr(0.05), lipoprotein(0.04), imt(0.03), mir(0.03), childhood(0.03), chd(0.03), risk(0.03)
-  * Target Document Rank Shifts: Doc 2095573: Rank 1 -> 24
-  * Drift Analysis: ADJUDICATION LEAK -- the LLM argued with the claim rather than writing a
-    corpus-style passage, and the verdict vocabulary (incorrect, statement) was
-    selected as expansion terms. Such words are rare in a scientific corpus, so
-    their idf is high and they outrank genuine domain terms within this query's
-    feedback set. This is a prompt-design failure, not a feedback-model failure.
-
- Case 5: Query ID: 597
-  * Query Text: "Incidence rates of cervical cancer have decreased."
-  * Baseline BM25 nDCG@10: 0.9134  -->  Rocchio-HyDE nDCG@10: 0.1564 (Delta: -0.7570)
-  * HyDE Expansion Terms  : hpv(0.19), papillomavirus(0.10), vaccine(0.08), pap(0.08), smear(0.07), widespread(0.05), trend(0.03), due(0.03)
-  * Corpus Expansion Terms: hpv(0.09), finland(0.07), neoplasia(0.05), grade(0.05), women(0.04), woman(0.03), cin(0.03), proportion(0.03)
-  * Target Document Rank Shifts: Doc 12779444: Rank 8 -> 22; Doc 36355784: Rank 1 -> 14; Doc 25742130: Rank 2 -> 7
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 6: Query ID: 569
-  * Query Text: "In adult tissue, most T cells are memory T cells."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.3333 (Delta: -0.6667)
-  * HyDE Expansion Terms  : antigen(0.07), subset(0.05), upon(0.04), long(0.04), persist(0.03), crucial(0.03), pathogen(0.03), rapid(0.02)
-  * Corpus Expansion Terms: trm(0.12), lung(0.03), bet(0.03), vaccine(0.03), hsv(0.02), reg(0.02), virus(0.02), local(0.02)
-  * Target Document Rank Shifts: Doc 23460562: Rank 1 -> 7
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 7: Query ID: 99
-  * Query Text: "Alizarin forms hydrogen bonds with residues involved in PGAM1 substrate binding."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.3333 (Delta: -0.6667)
-  * HyDE Expansion Terms  : atom(0.07), crucial(0.06), conformation(0.06), dye(0.05), intermolecular(0.03), bond(0.03), molecular(0.02), process(0.02)
-  * Corpus Expansion Terms: mhci(0.07), xpg(0.06), tmd(0.06), ubiquitin(0.04), mhc(0.03), dna(0.02), mutation(0.02), junction(0.02)
-  * Target Document Rank Shifts: Doc 18810195: Rank 1 -> 7
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 8: Query ID: 501
-  * Query Text: "Headaches are not correlated with cognitive impairment."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.3333 (Delta: -0.6667)
-  * HyDE Expansion Terms  : tension(0.05), head(0.04), hand(0.03), mental(0.03), certain(0.03), direct(0.02), condition(0.02), research(0.02)
-  * Corpus Expansion Terms: biofeedback(0.05), dementia(0.04), tension(0.03), emg(0.03), matter(0.02), thermal(0.02), white(0.02), chronic(0.02)
-  * Target Document Rank Shifts: Doc 17930286: Rank 1 -> 7
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 9: Query ID: 5
-  * Query Text: "1/2000 in UK have abnormal PrP positivity."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.3562 (Delta: -0.6438)
-  * HyDE Expansion Terms  : prion(0.44), cjd(0.12), jakob(0.11), creutzfeldt(0.11), prpsc(0.07), protein(0.05), kingdom(0.04), often(0.02)
-  * Corpus Expansion Terms: prion(0.13), vcjd(0.08), hpv(0.05), prnp(0.05), appendix(0.03), strain(0.03), million(0.02), codon(0.02)
-  * Target Document Rank Shifts: Doc 13734012: Rank 1 -> 6
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
- Case 10: Query ID: 644
-  * Query Text: "Insulin increases risk of severe kidney failure."
-  * Baseline BM25 nDCG@10: 1.0000  -->  Rocchio-HyDE nDCG@10: 0.3562 (Delta: -0.6438)
-  * HyDE Expansion Terms  : glomerular(0.06), renal(0.04), can(0.04), crucial(0.03), condition(0.03), stress(0.02), hyperinsulinemia(0.02), proteinuria(0.02)
-  * Corpus Expansion Terms: hypoglycaemia(0.12), renal(0.06), iah(0.06), metformin(0.05), counter(0.03), development(0.02), type(0.02), septic(0.02)
-  * Target Document Rank Shifts: Doc 13619127: Rank 1 -> 6
-  * Drift Analysis: TOPIC BROADENING -- the hypothetical passage described the general subject area
-    rather than the specific claim, so the selected terms generalised the query and
-    displaced the gold document in favour of topically-adjacent ones.
-
-TOP 10 QUALITATIVE SUCCESSFUL INTENT EXPANSION CASE STUDIES (Queries most improved by HyDE expansion):
- Case 1: Query ID: 1200
-  * Query Text: "The binding orientation of the ML-SA1 activator at hTRPML2 is different from the binding orientation of the ML-SA1 activator at hTRPML1."
-  * Baseline BM25 nDCG@10: 0.0000  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +1.0000)
-  * HyDE Expansion Terms  : trpml(0.13), distinct(0.08), channel(0.05), receptor(0.04), crucial(0.03), aspect(0.03), transient(0.03), manner(0.02)
-  * Corpus Expansion Terms: dna(0.08), fabp(0.07), angular(0.03), strand(0.03), cisplatin(0.03), position(0.03), microenvironment(0.02), tandem(0.02)
-  * Target Document Rank Shifts: Doc 3441524: Rank -1 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 2: Query ID: 431
-  * Query Text: "FoxO3a activation in neuronal death is mediated by reactive oxygen species (ROS)."
-  * Baseline BM25 nDCG@10: 0.0000  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +1.0000)
-  * HyDE Expansion Terms  : stress(0.10), foxo(0.06), forkhead(0.05), transcription(0.05), box(0.04), member(0.03), cellular(0.03), crucial(0.03)
-  * Corpus Expansion Terms: bat(0.03), redox(0.02), size(0.02), cold(0.02), cancer(0.01), dna(0.01), synthesis(0.01), reactant(0.01)
-  * Target Document Rank Shifts: Doc 28937856: Rank -1 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 3: Query ID: 514
-  * Query Text: "High dietary calcium intakes are unnecessary for prevention of secondary hyperparathyroidism in subjects with 25(OH)D levels above 75 nmol/liter."
-  * Baseline BM25 nDCG@10: 0.3333  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +0.6667)
-  * HyDE Expansion Terms  : parathyroid(0.13), pth(0.11), vitamin(0.10), hydroxyvitamin(0.06), condition(0.04), hypercalcaemia(0.04), maintain(0.02), chronic(0.02)
-  * Corpus Expansion Terms: vitamin(0.15), serum(0.08), microg(0.05), hydroxyvitamin(0.04), insulin(0.03), korean(0.03), slv(0.03), dbp(0.02)
-  * Target Document Rank Shifts: Doc 16256507: Rank 7 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 4: Query ID: 1245
-  * Query Text: "The one-child policy has been successful in lowering population growth."
-  * Baseline BM25 nDCG@10: 0.3333  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +0.6667)
-  * HyDE Expansion Terms  : china(0.09), government(0.03), children(0.03), rural(0.03), rate(0.03), urban(0.03), impact(0.02), per(0.02)
-  * Corpus Expansion Terms: muscular(0.03), spinal(0.03), health(0.03), will(0.02), children(0.02), motor(0.02), access(0.02), young(0.01)
-  * Target Document Rank Shifts: Doc 7662395: Rank 7 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 5: Query ID: 587
-  * Query Text: "In transgenic mice harboring green florescent protein under the control of the Sox2 promoter, less than ten percent of the cells with green florescent colocalize with cell proliferation markers."
-  * Baseline BM25 nDCG@10: 0.3562  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +0.6438)
-  * HyDE Expansion Terms  : gfp(0.29), portion(0.03), driven(0.03), present(0.02), overlap(0.02), fewer(0.01), pattern(0.01), fate(0.01)
-  * Corpus Expansion Terms: bud(0.05), fucci(0.04), taro(0.03), banana(0.03), mcp(0.03), tabv(0.03), bza(0.02), tobacco(0.02)
-  * Target Document Rank Shifts: Doc 16999023: Rank 6 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 6: Query ID: 133
-  * Query Text: "Assembly of invadopodia is triggered by focal generation of phosphatidylinositol-3,4-biphosphate and the activation of the nonreceptor tyrosine kinase Src."
-  * Baseline BM25 nDCG@10: 0.3392  -->  Rocchio-HyDE nDCG@10: 0.8435 (Delta: +0.5044)
-  * HyDE Expansion Terms  : actin(0.06), matrix(0.06), downstream(0.05), extracellular(0.04), lipid(0.03), receptor(0.03), non(0.02), second(0.02)
-  * Corpus Expansion Terms: trastuzumab(0.12), nmdar(0.05), schizophrenia(0.04), iiia(0.03), actin(0.03), pma(0.03), extension(0.03), gpiib(0.03)
-  * Target Document Rank Shifts: Doc 38485364: Rank 97 -> 53; Doc 6969753: Rank 21 -> 2; Doc 17934082: Rank 20 -> 6
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 7: Query ID: 831
-  * Query Text: "NF2 (Merlin) prevents phosphorylation and subsequent cytoplasmic sequestration of YAP in Drosophila."
-  * Baseline BM25 nDCG@10: 0.0000  -->  Rocchio-HyDE nDCG@10: 0.5000 (Delta: +0.5000)
-  * HyDE Expansion Terms  : hippo(0.07), suppressor(0.05), nuclear(0.04), tumor(0.04), crucial(0.03), cellular(0.03), known(0.03), protein(0.02)
-  * Corpus Expansion Terms: tead(0.13), taz(0.08), hippo(0.07), sqh(0.05), transcription(0.04), myosin(0.04), matrix(0.02), growth(0.02)
-  * Target Document Rank Shifts: Doc 1897324: Rank 16 -> 3
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 8: Query ID: 54
-  * Query Text: "AMP-activated protein kinase (AMPK) activation increases inflammation-related fibrosis in the lungs."
-  * Baseline BM25 nDCG@10: 0.5000  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +0.5000)
-  * HyDE Expansion Terms  : lung(0.06), cellular(0.04), sensor(0.04), matrix(0.04), extracellular(0.03), pro(0.03), context(0.03), stress(0.03)
-  * Corpus Expansion Terms: metformin(0.07), nafld(0.06), subunit(0.03), cellular(0.02), beta(0.02), jak(0.02), stat(0.02), mutation(0.02)
-  * Target Document Rank Shifts: Doc 49556906: Rank 3 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 9: Query ID: 232
-  * Query Text: "Cataract and trachoma are the primary cause of blindness in Southern Sudan."
-  * Baseline BM25 nDCG@10: 0.5000  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +0.5000)
-  * HyDE Expansion Terms  : lens(0.11), vision(0.10), condition(0.06), corynebacterium(0.05), access(0.05), corneal(0.04), visual(0.03), poor(0.03)
-  * Corpus Expansion Terms: vision(0.10), hdi(0.05), low(0.04), ayod(0.03), mankien(0.03), payam(0.03), musca(0.02), media(0.02)
-  * Target Document Rank Shifts: Doc 10536636: Rank 3 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
- Case 10: Query ID: 75
-  * Query Text: "Active H. pylori urease has a polymeric structure that compromises two subunits, UreA and UreB."
-  * Baseline BM25 nDCG@10: 0.5000  -->  Rocchio-HyDE nDCG@10: 1.0000 (Delta: +0.5000)
-  * HyDE Expansion Terms  : ammonia(0.10), bacterium(0.10), stomach(0.10), subunit(0.08), environment(0.07), crucial(0.05), gastric(0.04), complex(0.03)
-  * Corpus Expansion Terms: vaccine(0.12), ctb(0.07), uref(0.06), ltb(0.05), ureg(0.04), jbu(0.04), huepi(0.04), balb(0.04)
-  * Target Document Rank Shifts: Doc 4387784: Rank 3 -> 1
-  * Intent Match Analysis: the LLM supplied domain synonyms and expanded abbreviations
-    that the query lacked and that no top-ranked corpus document contained, bridging
-    the Part 3 vocabulary gap.
-
-========================================================================================================
-WRITTEN VERDICT: FEEDBACK SOURCE OR COMBINATION METHOD?
-========================================================================================================
- Averaged over the 3 (N,k) settings above:
-   - Source effect      (B-C) = +0.0576 nDCG@10  [per setting: +0.0752, +0.1126, -0.0149]
-   - Combination effect (B-A) = -0.0801 nDCG@10  [per setting: -0.0012, -0.0429, -0.1962]
- On scifact, the larger average magnitude belongs to the 'combination method'.
-
- Reading the table rather than asserting: holding the combination method fixed at
- Rocchio, replacing corpus feedback documents with LLM-generated ones changes nDCG@10 by
- +0.0576, and this effect is stable in sign across settings where the expansion budget k
- is small. Holding the source fixed at HyDE, swapping naive concatenation for Rocchio
- weighting changes nDCG@10 by -0.0801, and this effect is strongly k-dependent -- it
- degrades monotonically as k grows. That k-dependence is a property of the inherited
- weighting scheme, not of the feedback source: see limitation (3) below, where alpha is
- never applied and expansion mass therefore grows unchecked relative to the query. The
- source comparison (B vs C) is run through identical machinery and is the controlled
- measurement here; the combination comparison is confounded by that weighting defect.
-
-========================================================================================================
-METHODOLOGICAL LIMITATIONS (inherited from Part 4a, documented not patched)
-========================================================================================================
-The Rocchio scoring code in part4_rocchio.py is inherited by Part 4b UNCHANGED, as the
-assignment requires. Four deviations from the textbook/paper formulation were measured
-during this work and are documented here rather than patched, so that Part 4a's already
-reported numbers stay reproducible. All four apply equally to arms (B) and (C), so the
-source-effect comparison (B vs C) remains internally controlled; arm (A) bypasses the
-expander entirely and is therefore unaffected by (1), (2) and (4).
-
-  (1) STEMMING MISMATCH. The Lucene index is built with Anserini's default Porter
-      stemmer, but get_doc_tokens() emits UNSTEMMED tokens and get_idf() then looks
-      those surface forms up in the stemmed index. Measured on indexes/scifact:
-      df("summary")=0 vs df("summari")=117; df("cells")=0 vs df("cell")=2530;
-      df("entities")=0 vs df("entiti")=14. Terms with df=0 get idf=0.0 and are
-      discarded by the `if idf <= 0.0: continue` guard, so only candidate terms whose
-      surface form already equals their Porter stem survive: measured over 6 SciFact
-      queries, 263 / 934 = 28.2% of candidate terms survive. Near-miss tokens are worse
-      than dropped: df("changes")=1 (the real posting is "chang", df~2200) yields a
-      near-maximal idf, so "changes" is selected as the TOP expansion term with boost
-      1.00 on multiple queries and is then re-stemmed to "chang" at search time,
-      matching a large share of the corpus.
-
-  (2) MISSING 10% DOCUMENT-FREQUENCY FILTER. The assignment and Section 2.1 of Jedidi &
-      Lin (2025) both require discarding terms that occur in more than 10% of corpus
-      documents before ranking candidates. No such filter is implemented; the only
-      filter is idf<=0, which (given the RSJ idf formula used) excludes nothing except
-      the df=0 terms of (1). Terms such as "can" (df=23.1% of SciFact) and "cancer"
-      (df=15.7%) currently pass through as weighted expansion terms. Note that (1) and
-      (2) partially cancel: the stemming mismatch is accidentally suppressing many
-      high-df terms, so fixing either one alone would degrade results further.
-
-  (3) NEITHER ALPHA NOR BETA AFFECTS THE RANKING. expand_query() takes an `alpha`
-      argument and never references it in its body: original query terms receive
-      Lucene's implicit boost of 1.0 while each expansion term receives
-      score/max_score. Beta IS referenced, but only as a global multiplier applied to
-      every candidate term alike, so it cancels exactly in the score/max_score
-      normalisation. Verified on SciFact (N=3, k=5, corpus feedback): beta = 0.25, 0.75
-      and 5.00 all yield nDCG@10 = 0.590356 to six decimal places. Consequently the
-      alpha:beta balance of Rocchio's Eq. 2 is not implemented at all -- the
-      query-vs-feedback trade-off is set implicitly by max-normalisation.
-
-      Two consequences for Part 4a's report. First, this is the direct cause of the
-      collapse at large k: at k=20 the expansion mass outweighs a ~10-token query
-      roughly 2:1, visible in the k-sweep in Table 1 above. Second, it explains why 4a's
-      "Rocchio (N=3, k=5, pos-only, beta=0.75)" and "Tuned Rocchio (N=3, k=5, beta=0.25)"
-      rows are identical across all four metrics -- 4a's dev-split grid search was
-      searching a beta axis that has no effect on the output, so its selected beta
-      carries no information.
-
-  (4) QUERY TERMS EXCLUDED FROM THE FEEDBACK SUM. Candidate terms already present in the
-      query are skipped (`if term in q_term_set: continue`). Under Rocchio's Eq. 2 such a
-      term should receive alpha*f(q)[t] + (beta/N)*sum f~(d)[t]; here it receives only the
-      implicit alpha component and is never reinforced by the feedback evidence.
-
-REPRODUCTION OF PART 4a BY ARM (C). Arm (C) calls Part 4a's expander with no changes, so
-its numbers must match part4a_results/scifact_results.txt exactly, and they do -- at both
-shared settings, on all four metrics:
-
-    N=3, k=5 : nDCG@10 0.5904 | Recall@100 0.9030 | MRR@10 0.5280 | MAP 0.5225
-    N=5, k=10: nDCG@10 0.5155 | Recall@100 0.8773 | MRR@10 0.4420 | MAP 0.4380
-
-This is the check that the "reuse 4a unchanged" requirement is actually met rather than
-merely asserted: the only subclassed method is get_doc_tokens(), so pointing the same
-expander at corpus documents must and does return to 4a's published numbers.
-
-CONSEQUENCE FOR THE 4b VERDICT. (3) in particular penalises arms (B) and (C) relative to
-arm (A) as k grows, because only (B) and (C) route weights through max-normalisation.
-The source effect (B vs C) is measured under identical machinery and is therefore the
-trustworthy comparison; the combination effect (B vs A) should be read with (3) in mind
-and is discussed on that basis in the verdict below.
-
