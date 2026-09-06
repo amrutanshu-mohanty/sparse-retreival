@@ -3,7 +3,6 @@
 __pycache__/
 *.pyc
 
-
 # Java setup
 jdk-*/
 jdk.zip
@@ -17,6 +16,7 @@ indexes/
 # Logs and temp files
 *.log
 output.txt
+chat_export.md
 
 # OS generated files
 .DS_Store
